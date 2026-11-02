@@ -406,9 +406,16 @@ summary { cursor:pointer; font-size:13px; font-weight:800; }
       byId('buffalo-only').setAttribute('aria-pressed',String(!state.toronto));
       byId('with-toronto').setAttribute('aria-pressed',String(state.toronto));
       byId('route-note').textContent=state.toronto
-        ?(c.buffaloStayType==='airbnb'?'Leafs on Monday, January 11. Check out of Buffalo Airbnb that morning.':
-          'Includes Monday’s Leafs game. Scenario 1 arrives Saturday, January 9.')
-        :'Bills and Sabres only. No Leafs ticket or Toronto travel cost.';
+        ?(c.buffaloStayType==='airbnb'
+            ?'Leafs Monday, January 11. Check out of the Buffalo Airbnb that morning.'
+            :state.scenario==='2'
+              ?'Arrive Saturday, January 9. Leafs in Toronto Monday; return to Buffalo for Sabres Tuesday.'
+              :state.scenario==='1'
+                ?'Arrive Saturday, January 9. Leafs in Toronto Monday, January 11.'
+                :'Arrive Friday, January 8. Leafs in Toronto Monday, January 11.')
+        :state.scenario==='2'
+          ?'Arrive Saturday with the hotel, Friday with the Airbnb. Sabres Tuesday; no Toronto game.'
+          :'Bills and Sabres only. No Leafs ticket or Toronto travel cost.';
       byId('scenario-one-arrival').textContent=c.buffaloStayType==='airbnb'||!state.toronto
         ?'Arrive Friday, January 8':'Arrive Saturday, January 9';
       byId('scenario-two-arrival').textContent=c.buffaloStayType==='airbnb'
