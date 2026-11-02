@@ -252,7 +252,7 @@ summary { cursor:pointer; font-size:13px; font-weight:800; }
     <aside class="stack right-side" aria-label="Your calculated trip">
       <section class="panel" aria-labelledby="itinerary-heading">
         <div class="trip-header"><div><p class="section-id">YOUR PLAN</p><h2 id="itinerary-heading">Trip itinerary</h2></div><span class="number-badge" id="days-badge">5 days</span></div>
-        <div class="summary-grid"><div class="metric"><span class="m-title">CHECK IN</span><span class="m-value" id="checkin-stat">Jan 8</span></div><div class="metric"><span class="m-title">TRAVEL HOME</span><span class="m-value" id="departure-stat">Jan 12</span></div><div class="metric"><span class="m-title">HOTEL NIGHTS</span><span class="m-value" id="nights-stat">4</span></div><div class="metric"><span class="m-title">HOME GAMES</span><span class="m-value" id="games-stat">3</span></div></div>
+        <div class="summary-grid"><div class="metric"><span class="m-title">CHECK IN</span><span class="m-value" id="checkin-stat">Jan 8</span></div><div class="metric"><span class="m-title">TRAVEL HOME</span><span class="m-value" id="departure-stat">Jan 12</span></div><div class="metric"><span class="m-title">LODGING NIGHTS</span><span class="m-value" id="nights-stat">4</span></div><div class="metric"><span class="m-title">HOME GAMES</span><span class="m-value" id="games-stat">3</span></div></div>
         <div class="itinerary" id="itinerary-list"></div>
         <div class="warning" id="schedule-warning" role="note">Bills Week 18 kickoff is not final. Check the NFL schedule before committing to nonrefundable travel.</div>
       </section>
@@ -288,15 +288,12 @@ summary { cursor:pointer; font-size:13px; font-weight:800; }
     var state = Object.assign({}, DEFAULTS);
     try {
       var saved = JSON.parse(localStorage.getItem('week18-budget-v4') || 'null');
-      var migratingDefaults = !saved;
       if (!saved) saved = JSON.parse(localStorage.getItem('week18-budget-v3') || 'null');
       if (!saved) saved = JSON.parse(localStorage.getItem('week18-budget-v2') || 'null');
       var fromOldVersion = !saved;
       if (!saved) saved = JSON.parse(localStorage.getItem('week18-budget-v1') || 'null');
       if (saved && typeof saved === 'object') {
         for (var key in DEFAULTS) if (Object.prototype.hasOwnProperty.call(saved,key)) state[key] = saved[key];
-        // Update the old three-traveler default without resetting other saved preferences.
-        if (migratingDefaults && Number(state.people) === 3) state.people = 4;
         // Existing users with the old $55 default receive the new $100 default.
         if (fromOldVersion && Number(state.foodDaily) === 55) state.foodDaily = 100;
       }
@@ -505,7 +502,7 @@ summary { cursor:pointer; font-size:13px; font-weight:800; }
     function notify(message) {var toast=byId('toast');toast.textContent=message;toast.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(function(){toast.classList.remove('show');},2400);}
     function summary() {
       var c=calc();
-      return 'WEEK 18 ROAD TRIP — JANUARY 2027\nBuffalo '+(c.buffaloStayType==='airbnb'?'Airbnb':'hotel')+': '+exactCurrency(c.bookedHotelCash)+' ('+(c.saturdayArrival?'Jan 9–11':'Jan 8–11')+')\nScenario '+state.scenario+'\nToronto Maple Leafs: '+(state.toronto?'Included':'Not included')+'\nFood & drinks in total: '+(c.foodIncluded?'Yes':'No')+'\nTravelers: '+c.p+'\nRooms: '+c.rooms+' | Vehicles: '+c.vehicles+'\nArrival: '+(c.saturdayArrival?'Jan 9':'Jan 8')+'\nHotel nights: '+c.nights+'\nTravel home: '+(state.scenario==='2'?'Jan 13':state.toronto?'Jan 12':'Jan 11')+'\n\nEXPENSES (GROUP / PER PERSON)\n'+[[c.buffaloStayType==='airbnb'?'Buffalo Airbnb (incl. tax)':'Buffalo hotel (incl. tax)',c.bookedHotelCash],['Additional rooms/nights',c.estimatedHotelBase],['Extra hotel taxes',c.estimatedHotelTax],['Bills tickets',c.bills],['Sabres tickets',c.sabres],...(state.toronto?[['Leafs tickets',c.leafs]]:[]),['Fuel',c.fuel],['Parking & tolls',c.parking],['Food and drinks'+(c.foodIncluded?'':' (excluded)'),c.includedFood]].map(function(x){return x[0]+': '+currency(x[1])+' / '+currency(x[1]/c.p);}).join('\n')+'\n\nFOOD & DRINKS / PERSON BY DAY\n'+c.foodDays.map(function(day){return day.label+' ('+day.games+' game(s)): '+currency(day.amount);}).join('\n')+'\n\nGROUP TOTAL: '+currency(c.total)+'\nPER PERSON: '+currency(c.total/c.p)+'\n\nPlanning estimates only. NFL Week 18 kickoff is not final.';
+      return 'WEEK 18 ROAD TRIP — JANUARY 2027\nBuffalo '+(c.buffaloStayType==='airbnb'?'Airbnb':'hotel')+': '+exactCurrency(c.bookedHotelCash)+' ('+(c.saturdayArrival?'Jan 9–11':'Jan 8–11')+')\nScenario '+state.scenario+'\nToronto Maple Leafs: '+(state.toronto?'Included':'Not included')+'\nFood & drinks in total: '+(c.foodIncluded?'Yes':'No')+'\nTravelers: '+c.p+'\nBuffalo stay units: '+c.rooms+' | Vehicles: '+c.vehicles+'\nArrival: '+(c.saturdayArrival?'Jan 9':'Jan 8')+'\nLodging nights: '+c.nights+'\nTravel home: '+(state.scenario==='2'?'Jan 13':state.toronto?'Jan 12':'Jan 11')+'\n\nEXPENSES (GROUP / PER PERSON)\n'+[[c.buffaloStayType==='airbnb'?'Buffalo Airbnb (incl. tax)':'Buffalo hotel (incl. tax)',c.bookedHotelCash],['Additional rooms/nights',c.estimatedHotelBase],['Extra hotel taxes',c.estimatedHotelTax],['Bills tickets',c.bills],['Sabres tickets',c.sabres],...(state.toronto?[['Leafs tickets',c.leafs]]:[]),['Fuel',c.fuel],['Parking & tolls',c.parking],['Food and drinks'+(c.foodIncluded?'':' (excluded)'),c.includedFood]].map(function(x){return x[0]+': '+currency(x[1])+' / '+currency(x[1]/c.p);}).join('\n')+'\n\nFOOD & DRINKS / PERSON BY DAY\n'+c.foodDays.map(function(day){return day.label+' ('+day.games+' game(s)): '+currency(day.amount);}).join('\n')+'\n\nGROUP TOTAL: '+currency(c.total)+'\nPER PERSON: '+currency(c.total/c.p)+'\n\nPlanning estimates only. NFL Week 18 kickoff is not final.';
     }
     byId('copy-summary').addEventListener('click',function(){
       var text=summary();
