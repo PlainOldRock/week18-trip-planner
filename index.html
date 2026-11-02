@@ -180,7 +180,7 @@ summary { cursor:pointer; font-size:13px; font-weight:800; }
       <div class="hero-cost" aria-live="polite" aria-atomic="true">
         <div class="eyebrow">ESTIMATED COST PER PERSON</div>
         <div class="price" id="hero-person-cost">$0</div>
-        <div class="sub" id="hero-person-sub">3 people sharing costs</div>
+        <div class="sub" id="hero-person-sub">4 people sharing costs</div>
         <div class="line"></div>
         <div class="group-row"><span>Entire group</span><strong id="hero-group-cost">$0</strong></div>
       </div>
@@ -207,7 +207,7 @@ summary { cursor:pointer; font-size:13px; font-weight:800; }
       <section class="panel" aria-labelledby="budget-heading">
         <div class="panel-head"><div><p class="section-id">03 / THE GROUP</p><h2 id="budget-heading">Customize your budget</h2><p class="helper">All shared expenses are split evenly per traveler.</p></div></div>
         <div class="choice-grid">
-          <div class="form-row"><div><div class="form-label">Number of travelers</div><div class="form-sub">Add as many as you need</div></div><div class="stepper"><button type="button" id="decrease-people" aria-label="Remove one traveler">−</button><span id="travelers-number" aria-live="polite">3</span><button type="button" id="increase-people" aria-label="Add one traveler">+</button></div></div>
+          <div class="form-row"><div><div class="form-label">Number of travelers</div><div class="form-sub">Add as many as you need</div></div><div class="stepper"><button type="button" id="decrease-people" aria-label="Remove one traveler">−</button><span id="travelers-number" aria-live="polite">4</span><button type="button" id="increase-people" aria-label="Add one traveler">+</button></div></div>
           <div class="meta-pills"><span class="meta-pill" id="room-pill">1 hotel room</span><span class="meta-pill" id="vehicle-pill">1 vehicle</span></div>
           <div>
             <div class="form-label" style="margin-bottom:8px">Buffalo stay</div>
@@ -274,15 +274,19 @@ summary { cursor:pointer; font-size:13px; font-weight:800; }
   <script>
   (function () {
     'use strict';
-    var DEFAULTS = { scenario:'1', toronto:true, buffaloStay:'hotel', includeFood:false, people:3, hotelRate:270, foodDaily:100, billsPrice:225, sabresPrice:75, leafsPrice:145 };
+    var DEFAULTS = { scenario:'1', toronto:true, buffaloStay:'hotel', includeFood:false, people:4, hotelRate:270, foodDaily:100, billsPrice:225, sabresPrice:75, leafsPrice:145 };
     var state = Object.assign({}, DEFAULTS);
     try {
-      var saved = JSON.parse(localStorage.getItem('week18-budget-v3') || 'null');
+      var saved = JSON.parse(localStorage.getItem('week18-budget-v4') || 'null');
+      var migratingDefaults = !saved;
+      if (!saved) saved = JSON.parse(localStorage.getItem('week18-budget-v3') || 'null');
       if (!saved) saved = JSON.parse(localStorage.getItem('week18-budget-v2') || 'null');
       var fromOldVersion = !saved;
       if (!saved) saved = JSON.parse(localStorage.getItem('week18-budget-v1') || 'null');
       if (saved && typeof saved === 'object') {
         for (var key in DEFAULTS) if (Object.prototype.hasOwnProperty.call(saved,key)) state[key] = saved[key];
+        // Update the old three-traveler default without resetting other saved preferences.
+        if (migratingDefaults && Number(state.people) === 3) state.people = 4;
         // Existing users with the old $55 default receive the new $100 default.
         if (fromOldVersion && Number(state.foodDaily) === 55) state.foodDaily = 100;
       }
@@ -303,7 +307,7 @@ summary { cursor:pointer; font-size:13px; font-weight:800; }
     }
     function calc(scenario) {
       var sc = scenario || state.scenario;
-      var p = Math.max(1, Math.floor(numeric(state.people,3)));
+      var p = Math.max(1, Math.floor(numeric(state.people,4)));
       var rooms = Math.ceil(p/4), vehicles = Math.ceil(p/5);
       var saturdayArrival=sc==='2'||(sc==='1'&&state.toronto);
       var buffaloNights=saturdayArrival?2:3;
@@ -427,7 +431,7 @@ summary { cursor:pointer; font-size:13px; font-weight:800; }
         tr.append(elem('td','',item[0]+'. '+item[1]),elem('td','',String(x.nights)),elem('td','',currency(x.total)),elem('td','',currency(x.total/x.p)));
         comparison.append(tr);
       });
-      try {localStorage.setItem('week18-budget-v3',JSON.stringify(state));} catch(e){}
+      try {localStorage.setItem('week18-budget-v4',JSON.stringify(state));} catch(e){}
     }
     function setNumber(key,id){
       byId(id).addEventListener('input',function(e){state[key]=numeric(e.target.value,0);render();});
@@ -461,7 +465,7 @@ summary { cursor:pointer; font-size:13px; font-weight:800; }
     byId('bills-price').value=String(numeric(state.billsPrice,225));
     byId('sabres-price').value=String(numeric(state.sabresPrice,75));
     byId('leafs-price').value=String(numeric(state.leafsPrice,145));
-    state.people=Math.max(1,Math.floor(numeric(state.people,3)));
+    state.people=Math.max(1,Math.floor(numeric(state.people,4)));
     if(!['1','2','3'].includes(state.scenario))state.scenario='1';
     state.toronto=Boolean(state.toronto);
     state.includeFood=state.includeFood===true;
