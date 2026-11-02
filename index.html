@@ -70,6 +70,10 @@ input::-webkit-inner-spin-button,input::-webkit-outer-spin-button { -webkit-appe
 .preset-row { display:flex; gap:7px; flex-wrap:wrap; }
 .preset { padding:8px 11px; border:1px solid #000; border-radius:0; background:#fff; color:#000; font-weight:700; font-size:12px; }
 .preset.active { background:#000; color:#fff; border-color:#000; }
+.food-day-rows { border-top:1px solid #000; }
+.food-day-row { display:flex; gap:12px; justify-content:space-between; align-items:center; padding:9px 0; border-bottom:1px solid #000; font-size:12px; }
+.food-day-row strong { font-variant-numeric:tabular-nums; white-space:nowrap; }
+.food-day-row small { display:block; font-size:11px; font-weight:400; }
 details { border:1px solid #000; border-radius:0; padding:12px; }
 summary { cursor:pointer; font-size:13px; font-weight:800; }
 .ticket-fields { display:grid; gap:12px; padding-top:15px; }
@@ -156,9 +160,8 @@ summary { cursor:pointer; font-size:13px; font-weight:800; }
   <div class="shell">
     <section class="hero" aria-label="Trip overview">
       <div>
-        <div class="kicker"><i aria-hidden="true"></i> YOUR GAME DAY ROAD TRIP</div>
-        <h1>Plan the games.<br>Know the cost.</h1>
-        <p>Compare the three schedules, include or skip Toronto, and split the costs. Every estimate updates as you go.</p>
+        <h1>Week 18 Trip Planner</h1>
+        <p>Buffalo &amp; Toronto · January 2027</p>
         <div class="details"><span class="tag">BUFFALO BILLS</span><span class="tag">BUFFALO SABRES</span><span class="tag" id="leafs-hero-tag">TORONTO MAPLE LEAFS</span></div>
       </div>
       <div class="hero-cost" aria-live="polite" aria-atomic="true">
@@ -196,9 +199,11 @@ summary { cursor:pointer; font-size:13px; font-weight:800; }
           <div class="divider"></div>
           <div class="form-row"><div><label class="form-label" for="hotel-rate">Hotel price per night</label><div class="form-sub">Per room, before tax · USD</div></div><div class="money-input-wrap"><span aria-hidden="true">$</span><input type="number" min="0" max="100000" step="10" id="hotel-rate" value="270" inputmode="decimal"></div></div>
           <div class="divider"></div>
-          <div class="form-row"><div><label class="form-label" for="food-daily">Food &amp; drinks per day</label><div class="form-sub">Per person · USD</div></div><div class="money-input-wrap"><span aria-hidden="true">$</span><input type="number" min="0" max="100000" step="5" id="food-daily" value="55" inputmode="decimal"></div></div>
-          <div class="preset-row" id="food-presets"><button type="button" class="preset" data-food="30">$30/day</button><button type="button" class="preset active" data-food="55">$55/day</button><button type="button" class="preset" data-food="75">$75/day</button><button type="button" class="preset" data-food="100">$100/day</button></div>
-          <p class="subtle-note" id="food-note">Food and drinks for the full trip: $275 per person.</p>
+          <div class="form-row"><div><label class="form-label" for="food-daily">Food &amp; drinks per day</label><div class="form-sub">Base daily spending per person · USD</div></div><div class="money-input-wrap"><span aria-hidden="true">$</span><input type="number" min="0" max="100000" step="5" id="food-daily" value="100" inputmode="decimal"></div></div>
+          <div class="preset-row" id="food-presets"><button type="button" class="preset" data-food="50">$50/day</button><button type="button" class="preset" data-food="75">$75/day</button><button type="button" class="preset active" data-food="100">$100/day</button><button type="button" class="preset" data-food="150">$150/day</button></div>
+          <p class="subtle-note">Each game adds $50 per person on that day. Two games on Saturday add $100, making the default doubleheader budget $200.</p>
+          <div class="food-day-rows" id="food-day-rows" aria-label="Daily food and drink budget"></div>
+          <p class="subtle-note" id="food-note">Daily food and drink budget per person.</p>
           <details><summary>Edit ticket price assumptions</summary><div class="ticket-fields">
             <label class="ticket-field"><span>Bills ticket / person</span><span class="money-input-wrap"><span aria-hidden="true">$</span><input id="bills-price" type="number" min="0" step="5" value="225"></span></label>
             <label class="ticket-field"><span>Sabres ticket / person</span><span class="money-input-wrap"><span aria-hidden="true">$</span><input id="sabres-price" type="number" min="0" step="5" value="75"></span></label>
@@ -234,17 +239,29 @@ summary { cursor:pointer; font-size:13px; font-weight:800; }
   <script>
   (function () {
     'use strict';
-    var DEFAULTS = { scenario:'1', toronto:true, people:3, hotelRate:270, foodDaily:55, billsPrice:225, sabresPrice:75, leafsPrice:145 };
+    var DEFAULTS = { scenario:'1', toronto:true, people:3, hotelRate:270, foodDaily:100, billsPrice:225, sabresPrice:75, leafsPrice:145 };
     var state = Object.assign({}, DEFAULTS);
     try {
-      var saved = JSON.parse(localStorage.getItem('week18-budget-v1') || 'null');
+      var saved = JSON.parse(localStorage.getItem('week18-budget-v2') || 'null');
+      var fromOldVersion = !saved;
+      if (!saved) saved = JSON.parse(localStorage.getItem('week18-budget-v1') || 'null');
       if (saved && typeof saved === 'object') {
         for (var key in DEFAULTS) if (Object.prototype.hasOwnProperty.call(saved,key)) state[key] = saved[key];
+        // Existing users with the old $55 default receive the new $100 default.
+        if (fromOldVersion && Number(state.foodDaily) === 55) state.foodDaily = 100;
       }
     } catch (e) {}
     function numeric(value, fallback) { var n = Number(value); return Number.isFinite(n) ? Math.max(0, Math.min(100000, n)) : fallback; }
     function currency(n) { return '$' + Math.round(n).toLocaleString('en-US'); }
     function byId(id) { return document.getElementById(id); }
+    function foodDayPlan(sc, includeToronto) {
+      var dates=sc==='2'?[['Sat, Jan 9',1],['Sun, Jan 10',0],['Mon, Jan 11',includeToronto?1:0],['Tue, Jan 12',1],['Wed, Jan 13',0]]:
+        sc==='3'?[['Fri, Jan 8',0],['Sat, Jan 9',2],['Sun, Jan 10',0],['Mon, Jan 11',includeToronto?1:0]]:
+        [['Fri, Jan 8',0],['Sat, Jan 9',1],['Sun, Jan 10',1],['Mon, Jan 11',includeToronto?1:0]];
+      if (sc!=='2' && includeToronto) dates.push(['Tue, Jan 12',0]);
+      var base=numeric(state.foodDaily,100);
+      return dates.map(function(date) {return {label:date[0],games:date[1],amount:base+50*date[1]};});
+    }
     function calc(scenario) {
       var sc = scenario || state.scenario;
       var p = Math.max(1, Math.floor(numeric(state.people,3)));
@@ -258,8 +275,10 @@ summary { cursor:pointer; font-size:13px; font-weight:800; }
       var leafs = state.toronto?numeric(state.leafsPrice,145)*p:0;
       var fuel = (state.toronto ? (sc==='2'?300:280):240)*vehicles;
       var parking = (state.toronto ? (sc==='2'?220:200):150)*vehicles;
-      var food = numeric(state.foodDaily,55)*days*p;
-      return {p:p,rooms:rooms,vehicles:vehicles,nights:nights,days:days,hotel:hotel,tax:tax,bills:bills,sabres:sabres,leafs:leafs,fuel:fuel,parking:parking,food:food,total:hotel+tax+bills+sabres+leafs+fuel+parking+food};
+      var foodDays = foodDayPlan(sc,state.toronto);
+      var foodPerPerson = foodDays.reduce(function(sum,day){return sum+day.amount;},0);
+      var food = foodPerPerson*p;
+      return {p:p,rooms:rooms,vehicles:vehicles,nights:nights,days:days,hotel:hotel,tax:tax,bills:bills,sabres:sabres,leafs:leafs,fuel:fuel,parking:parking,food:food,foodDays:foodDays,foodPerPerson:foodPerPerson,total:hotel+tax+bills+sabres+leafs+fuel+parking+food};
     }
     function schedule() {
       var sc=state.scenario, t=state.toronto;
@@ -305,8 +324,16 @@ summary { cursor:pointer; font-size:13px; font-weight:800; }
       byId('hero-group-cost').textContent=currency(c.total);
       byId('sticky-person-cost').textContent=currency(c.total/c.p);
       byId('sticky-group-cost').textContent=currency(c.total);
-      byId('food-note').textContent='Food and drinks for the full trip: '+currency(c.food/c.p)+' per person ('+c.days+' days).';
-      document.querySelectorAll('.preset').forEach(function(button){button.classList.toggle('active',Number(button.dataset.food)===numeric(state.foodDaily,55));});
+      var foodRows=byId('food-day-rows'); foodRows.replaceChildren();
+      c.foodDays.forEach(function(day) {
+        var row=elem('div','food-day-row');
+        var details=elem('span','',day.label);
+        details.append(elem('small','',day.games===0?'No games':day.games===1?'1 game':'2 games'));
+        row.append(details,elem('strong','',currency(day.amount)));
+        foodRows.append(row);
+      });
+      byId('food-note').textContent='Total food & drinks: '+currency(c.foodPerPerson)+' per person ('+c.days+' days).';
+      document.querySelectorAll('.preset').forEach(function(button){button.classList.toggle('active',Number(button.dataset.food)===numeric(state.foodDaily,100));});
       byId('checkin-stat').textContent=state.scenario==='2'?'Jan 9':'Jan 8';
       byId('departure-stat').textContent=state.scenario==='2'?'Jan 13':state.toronto?'Jan 12':'Jan 11';
       byId('nights-stat').textContent=String(c.nights);
@@ -331,7 +358,7 @@ summary { cursor:pointer; font-size:13px; font-weight:800; }
         tr.append(elem('td','',item[0]+'. '+item[1]),elem('td','',String(x.nights)),elem('td','',currency(x.total)),elem('td','',currency(x.total/x.p)));
         comparison.append(tr);
       });
-      try {localStorage.setItem('week18-budget-v1',JSON.stringify(state));} catch(e){}
+      try {localStorage.setItem('week18-budget-v2',JSON.stringify(state));} catch(e){}
     }
     function setNumber(key,id){
       byId(id).addEventListener('input',function(e){state[key]=numeric(e.target.value,0);render();});
@@ -348,7 +375,7 @@ summary { cursor:pointer; font-size:13px; font-weight:800; }
     function notify(message) {var toast=byId('toast');toast.textContent=message;toast.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(function(){toast.classList.remove('show');},2400);}
     function summary() {
       var c=calc();
-      return 'WEEK 18 ROAD TRIP — JANUARY 2027\nScenario '+state.scenario+'\nToronto Maple Leafs: '+(state.toronto?'Included':'Not included')+'\nTravelers: '+c.p+'\nRooms: '+c.rooms+' | Vehicles: '+c.vehicles+'\nHotel nights: '+c.nights+'\nTravel home: '+(state.scenario==='2'?'Jan 13':state.toronto?'Jan 12':'Jan 11')+'\n\nEXPENSES (GROUP / PER PERSON)\n'+[['Hotels',c.hotel],['Hotel taxes',c.tax],['Bills tickets',c.bills],['Sabres tickets',c.sabres],...(state.toronto?[['Leafs tickets',c.leafs]]:[]),['Fuel',c.fuel],['Parking & tolls',c.parking],['Food and drinks',c.food]].map(function(x){return x[0]+': '+currency(x[1])+' / '+currency(x[1]/c.p);}).join('\n')+'\n\nGROUP TOTAL: '+currency(c.total)+'\nPER PERSON: '+currency(c.total/c.p)+'\n\nPlanning estimates only. NFL Week 18 kickoff is not final.';
+      return 'WEEK 18 ROAD TRIP — JANUARY 2027\nScenario '+state.scenario+'\nToronto Maple Leafs: '+(state.toronto?'Included':'Not included')+'\nTravelers: '+c.p+'\nRooms: '+c.rooms+' | Vehicles: '+c.vehicles+'\nHotel nights: '+c.nights+'\nTravel home: '+(state.scenario==='2'?'Jan 13':state.toronto?'Jan 12':'Jan 11')+'\n\nEXPENSES (GROUP / PER PERSON)\n'+[['Hotels',c.hotel],['Hotel taxes',c.tax],['Bills tickets',c.bills],['Sabres tickets',c.sabres],...(state.toronto?[['Leafs tickets',c.leafs]]:[]),['Fuel',c.fuel],['Parking & tolls',c.parking],['Food and drinks',c.food]].map(function(x){return x[0]+': '+currency(x[1])+' / '+currency(x[1]/c.p);}).join('\n')+'\n\nFOOD & DRINKS / PERSON BY DAY\n'+c.foodDays.map(function(day){return day.label+' ('+day.games+' game(s)): '+currency(day.amount);}).join('\n')+'\n\nGROUP TOTAL: '+currency(c.total)+'\nPER PERSON: '+currency(c.total/c.p)+'\n\nPlanning estimates only. NFL Week 18 kickoff is not final.';
     }
     byId('copy-summary').addEventListener('click',function(){
       var text=summary();
@@ -358,7 +385,7 @@ summary { cursor:pointer; font-size:13px; font-weight:800; }
     function fallbackCopy(text) {var area=elem('textarea');area.value=text;area.style.cssText='position:fixed;top:-1000px;left:-1000px';document.body.append(area);area.select();try{document.execCommand('copy');notify('Cost estimate copied!');}catch(e){notify('Copy unavailable in this browser');}area.remove();}
     byId('reset').addEventListener('click',function(){state=Object.assign({},DEFAULTS);['hotel-rate','food-daily','bills-price','sabres-price','leafs-price'].forEach(function(id,index){byId(id).value=[state.hotelRate,state.foodDaily,state.billsPrice,state.sabresPrice,state.leafsPrice][index];});render();notify('Calculator reset');});
     byId('hotel-rate').value=String(numeric(state.hotelRate,270));
-    byId('food-daily').value=String(numeric(state.foodDaily,55));
+    byId('food-daily').value=String(numeric(state.foodDaily,100));
     byId('bills-price').value=String(numeric(state.billsPrice,225));
     byId('sabres-price').value=String(numeric(state.sabresPrice,75));
     byId('leafs-price').value=String(numeric(state.leafsPrice,145));
