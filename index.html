@@ -192,7 +192,7 @@ summary { cursor:pointer; font-size:13px; font-weight:800; }
         <div class="panel-head"><div><p class="section-id">01 / THE SCHEDULE</p><h2 id="scenario-heading">Choose your scenario</h2><p class="helper">Your dates and hotel nights adjust automatically.</p></div></div>
         <div class="scenario-list" id="scenario-list">
           <label class="scenario-card selected" data-scenario="1"><input type="radio" name="scenario" value="1" checked><span><span class="title">Scenario 1 <span style="color:#477478;font-weight:650">/ Original weekend</span></span><span class="desc">Sabres Saturday · Bills Sunday</span><span class="date" id="scenario-one-arrival">Arrive Saturday with Leafs, Friday without</span></span></label>
-          <label class="scenario-card" data-scenario="2"><input type="radio" name="scenario" value="2"><span><span class="title">Scenario 2 <span style="color:#477478;font-weight:650">/ Saturday conflict</span></span><span class="desc">Bills Saturday · Sabres Tuesday</span><span class="date">Arrive Saturday, January 9</span></span></label>
+          <label class="scenario-card" data-scenario="2"><input type="radio" name="scenario" value="2"><span><span class="title">Scenario 2 <span style="color:#477478;font-weight:650">/ Saturday conflict</span></span><span class="desc">Bills Saturday · Sabres Tuesday</span><span class="date" id="scenario-two-arrival">Arrive Saturday, January 9</span></span></label>
           <label class="scenario-card" data-scenario="3"><input type="radio" name="scenario" value="3"><span><span class="title">Scenario 3 <span style="color:#477478;font-weight:650">/ Doubleheader</span></span><span class="desc">Bills Saturday 1 PM · Sabres Saturday 7 PM</span><span class="date">Arrive Friday, January 8</span></span></label>
         </div>
       </section>
@@ -254,7 +254,7 @@ summary { cursor:pointer; font-size:13px; font-weight:800; }
     </aside>
   </main>
   <section class="shell"><div class="comparison"><p class="section-id">SIDE BY SIDE</p><h2>Compare all three scenarios</h2><p class="helper">Using your current group size, prices, and Toronto choice. Select a scenario above to update the trip.</p><div class="comparison-scroll"><table class="compare-table"><thead><tr><th>Scenario</th><th>Nights</th><th>Group total</th><th>Per person</th></tr></thead><tbody id="comparison-rows"></tbody></table></div></div></section>
-  <footer class="shell footer"><p><strong>Buffalo accommodation:</strong> Hotel $1,090.57 or Airbnb $772.27 for January 8–11, both including tax. Saturday-arrival costs are prorated to two nights for planning; additional rooms and nights are estimated. <strong>Planning estimates only.</strong> Games are assumed to be home games on the dates discussed. The NFL has not finalized Week 18 kickoff times. Scenario 3 requires a Saturday 1 PM Bills kickoff and adequate travel time between Orchard Park and KeyBank Center. Hotels are modeled at up to 4 guests per room; vehicle costs assume up to 5 travelers per vehicle. Fuel, parking, tolls, hotel taxes (estimated 16%), and food are approximate and may differ in practice.</p><span>Made for your Week 18 road trip · 2027</span></footer>
+  <footer class="shell footer"><p><strong>Buffalo accommodation:</strong> Airbnb is fixed for Friday, January 8 through Monday, January 11 ($772.27 total, tax included). The hotel option is $1,090.57 for three nights and is prorated when arriving Saturday. Additional stays after Monday are estimated. <strong>Planning estimates only.</strong> Games are assumed to be home games on the dates discussed. The NFL has not finalized Week 18 kickoff times. Scenario 3 requires a Saturday 1 PM Bills kickoff and adequate travel time between Orchard Park and KeyBank Center. Hotels are modeled at up to 4 guests per room; vehicle costs assume up to 5 travelers per vehicle. Fuel, parking, tolls, hotel taxes (estimated 16%), and food are approximate and may differ in practice.</p><span>Week 18 road trip · 2027</span></footer>
   <div class="sticky-total" aria-label="Live trip cost">
     <div class="shell sticky-inner">
       <label class="sticky-option" for="include-food">
@@ -297,10 +297,12 @@ summary { cursor:pointer; font-size:13px; font-weight:800; }
     var BUFFALO_STAY_PRICES={hotel:1090.57,airbnb:772.27};
     function byId(id) { return document.getElementById(id); }
     function foodDayPlan(sc, includeToronto) {
+      var fixedAirbnb=state.buffaloStay==='airbnb';
       var dates=sc==='2'?[['Sat, Jan 9',1],['Sun, Jan 10',0],['Mon, Jan 11',includeToronto?1:0],['Tue, Jan 12',1],['Wed, Jan 13',0]]:
         sc==='3'?[['Fri, Jan 8',0],['Sat, Jan 9',2],['Sun, Jan 10',0],['Mon, Jan 11',includeToronto?1:0]]:
         includeToronto?[['Sat, Jan 9',1],['Sun, Jan 10',1],['Mon, Jan 11',1]]:
         [['Fri, Jan 8',0],['Sat, Jan 9',1],['Sun, Jan 10',1],['Mon, Jan 11',0]];
+      if(fixedAirbnb&&(sc==='2'||(sc==='1'&&includeToronto)))dates.unshift(['Fri, Jan 8',0]);
       if (sc!=='2' && includeToronto) dates.push(['Tue, Jan 12',0]);
       var base=numeric(state.foodDaily,100);
       return dates.map(function(date) {return {label:date[0],games:date[1],amount:base+50*date[1]};});
@@ -309,11 +311,14 @@ summary { cursor:pointer; font-size:13px; font-weight:800; }
       var sc = scenario || state.scenario;
       var p = Math.max(1, Math.floor(numeric(state.people,4)));
       var rooms = Math.ceil(p/4), vehicles = Math.ceil(p/5);
-      var saturdayArrival=sc==='2'||(sc==='1'&&state.toronto);
-      var buffaloNights=saturdayArrival?2:3;
-      var nights=sc==='2'?4:(sc==='1'?3:(state.toronto?4:3));
-      var days=nights+1;
       var buffaloStayType=state.buffaloStay==='airbnb'?'airbnb':'hotel';
+      // Airbnb dates are fixed (Fri Jan 8 to Mon Jan 11). Hotel dates can be shortened.
+      var saturdayArrival=buffaloStayType==='hotel'&&(sc==='2'||(sc==='1'&&state.toronto));
+      var buffaloNights=saturdayArrival?2:3;
+      var nights=sc==='2'?(buffaloStayType==='airbnb'?5:4):
+        sc==='1'?(state.toronto&&buffaloStayType==='airbnb'?4:3):
+        (state.toronto?4:3);
+      var days=nights+1;
       var bookedHotelCash=Math.round(BUFFALO_STAY_PRICES[buffaloStayType]*buffaloNights/3*100)/100;
       var extraRoomNights=Math.max(0,rooms-1)*buffaloNights
         +(sc==='2'?2:(state.toronto?1:0))*rooms;
@@ -335,19 +340,26 @@ summary { cursor:pointer; font-size:13px; font-weight:800; }
     }
     function schedule() {
       var sc=state.scenario, t=state.toronto;
+      var fixedAirbnb=state.buffaloStay==='airbnb';
       var rows=[];
-      if (sc==='3'||(sc==='1'&&!t)) rows.push({day:'FRI · JAN 8',title:'Arrive in Buffalo',note:'Check in and settle into the city.'});
+      if (fixedAirbnb||sc==='3'||(sc==='1'&&!t)) rows.push({day:'FRI · JAN 8',title:'Arrive in Buffalo',note:fixedAirbnb?'Check into the Airbnb for three nights.':'Check in and settle into the city.'});
       if (sc==='1') {
-        rows.push({day:'SAT · JAN 9',title:t?'Arrive + Sabres vs. Hurricanes':'Sabres vs. Hurricanes',note:'7:00 PM · KeyBank Center, Buffalo'});
+        rows.push({day:'SAT · JAN 9',title:t&&!fixedAirbnb?'Arrive + Sabres vs. Hurricanes':'Sabres vs. Hurricanes',note:'7:00 PM · KeyBank Center, Buffalo'});
         rows.push({day:'SUN · JAN 10',title:'Bills vs. Jets',note:'Kickoff TBD · Highmark Stadium, Orchard Park'});
       } else if(sc==='2') {
-        rows.push({day:'SAT · JAN 9',title:'Arrive + Bills vs. Jets',note:'Buffalo home game · kickoff TBD'});
+        rows.push({day:'SAT · JAN 9',title:fixedAirbnb?'Bills vs. Jets':'Arrive + Bills vs. Jets',note:'Buffalo home game · kickoff TBD'});
         rows.push({day:'SUN · JAN 10',title:'Free day in Buffalo',note:'Explore the city or relax.'});
       } else {
         rows.push({day:'SAT · JAN 9',title:'Bills + Sabres doubleheader',note:'Bills 1:00 PM · Sabres 7:00 PM'});
         rows.push({day:'SUN · JAN 10',title:'Free day in Buffalo',note:'Explore the city or relax.'});
       }
-      rows.push({day:'MON · JAN 11',title:t?'Maple Leafs vs. Jets':sc==='2'?'Free day in Buffalo':'Travel home',note:t?'7:30 PM · Scotiabank Arena, Toronto':sc==='2'?'Time in Buffalo before Tuesday’s Sabres game.':'Drive home from Buffalo.'});
+      rows.push({day:'MON · JAN 11',
+        title:t?(fixedAirbnb?'Airbnb checkout + Maple Leafs vs. Jets':'Maple Leafs vs. Jets'):
+          sc==='2'?(fixedAirbnb?'Airbnb checkout + hotel check-in':'Free day in Buffalo'):
+          fixedAirbnb?'Airbnb checkout + travel home':'Travel home',
+        note:t?'Leave Buffalo; Leafs 7:30 PM · Scotiabank Arena, Toronto':
+          sc==='2'?'Stay in another hotel for the Tuesday Sabres game.':
+          'Drive home from Buffalo.'});
       if (sc==='2') {
         rows.push({day:'TUE · JAN 12',title:'Sabres vs. Devils',note:'7:00 PM · KeyBank Center, Buffalo'});
         rows.push({day:'WED · JAN 13',title:'Travel home',note:'Drive home from Buffalo.'});
@@ -368,8 +380,14 @@ summary { cursor:pointer; font-size:13px; font-weight:800; }
       byId('with-toronto').classList.toggle('active',state.toronto);
       byId('buffalo-only').setAttribute('aria-pressed',String(!state.toronto));
       byId('with-toronto').setAttribute('aria-pressed',String(state.toronto));
-      byId('route-note').textContent=state.toronto?'Includes Monday’s Leafs game. Scenario 1 arrives Saturday, January 9.':'Bills and Sabres only. No Leafs ticket or Toronto travel cost.';
-      byId('scenario-one-arrival').textContent=state.toronto?'Arrive Saturday, January 9':'Arrive Friday, January 8';
+      byId('route-note').textContent=state.toronto
+        ?(c.buffaloStayType==='airbnb'?'Leafs on Monday, January 11. Check out of Buffalo Airbnb that morning.':
+          'Includes Monday’s Leafs game. Scenario 1 arrives Saturday, January 9.')
+        :'Bills and Sabres only. No Leafs ticket or Toronto travel cost.';
+      byId('scenario-one-arrival').textContent=c.buffaloStayType==='airbnb'||!state.toronto
+        ?'Arrive Friday, January 8':'Arrive Saturday, January 9';
+      byId('scenario-two-arrival').textContent=c.buffaloStayType==='airbnb'
+        ?'Arrive Friday, January 8':'Arrive Saturday, January 9';
       byId('stay-hotel').classList.toggle('active',c.buffaloStayType==='hotel');
       byId('stay-airbnb').classList.toggle('active',c.buffaloStayType==='airbnb');
       byId('stay-hotel').setAttribute('aria-pressed',String(c.buffaloStayType==='hotel'));
@@ -378,7 +396,7 @@ summary { cursor:pointer; font-size:13px; font-weight:800; }
       byId('buffalo-hotel-dates').textContent=(c.saturdayArrival?'January 9–11':'January 8–11')+', 2027 · '+c.buffaloNights+' nights · '+(c.buffaloStayType==='airbnb'?'entire home':'1 room');
       byId('buffalo-hotel-cost').textContent=exactCurrency(c.bookedHotelCash)+' USD';
       byId('buffalo-stay-details').textContent=c.buffaloStayType==='airbnb'
-        ?'4 beds · up to 4 guests · tax included'+(c.saturdayArrival?' · 2-night prorated estimate':'')
+        ?'Fixed reservation · Friday check-in, Monday checkout · 4 beds / 4 guests · tax included'
         :'Tax included · '+(c.saturdayArrival?'2-night prorated cost':'3-night total');
       byId('leafs-hero-tag').hidden=!state.toronto;
       byId('travelers-number').textContent=String(c.p);
@@ -412,7 +430,15 @@ summary { cursor:pointer; font-size:13px; font-weight:800; }
         var r=elem('div','day-row'); var date=elem('span','day-date',day.day);
         var copy=elem('div'); copy.append(elem('div','day-main',day.title),elem('div','day-sub',day.note));r.append(date,copy);itinerary.append(r);
       });
-      byId('schedule-warning').textContent=state.scenario==='3'?'Scenario 3 requires a Saturday 1 PM Bills kickoff and enough time between the stadium and arena.':state.scenario==='2'?'Scenario 2 begins Saturday. The hotel budget includes Saturday and Sunday in Buffalo plus Monday and Tuesday hotel nights.':'The Bills’ Week 18 kickoff is not final. Check before booking nonrefundable travel.';
+      byId('schedule-warning').textContent=state.scenario==='3'
+        ?'Scenario 3 requires a Saturday 1 PM Bills kickoff and enough time between the stadium and arena.'
+        :state.scenario==='2'
+          ?(c.buffaloStayType==='airbnb'
+            ?'Airbnb check-in Friday and checkout Monday. Monday and Tuesday nights require additional lodging; return to Buffalo for Tuesday’s Sabres game.'
+            :'Scenario 2 begins Saturday. The hotel budget includes Saturday and Sunday in Buffalo plus Monday and Tuesday hotel nights.')
+          :c.buffaloStayType==='airbnb'
+            ?'Airbnb is fixed for Friday through Monday. If Toronto is included, leave Buffalo Monday for the Leafs game. Bills kickoff is not final.'
+            :'The Bills’ Week 18 kickoff is not final. Check before booking nonrefundable travel.';
       var breakdown=[[c.buffaloStayType==='airbnb'?'Buffalo Airbnb (tax included)':'Buffalo hotel (tax included)',c.bookedHotelCash]];
       if(c.extraRoomNights){
         breakdown.push(['Additional hotel room-nights ('+c.extraRoomNights+')',c.estimatedHotelBase]);
