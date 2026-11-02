@@ -1,0 +1,373 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#122b39">
+  <meta name="description" content="Plan and compare three Buffalo Bills, Sabres and Toronto Maple Leafs road-trip scenarios for NFL Week 18 in January 2027.">
+  <title>Week 18 Road Trip | Buffalo + Toronto Budget Planner</title>
+  <style>
+    :root {
+      --bg: #f4f5f1; --paper: #ffffff; --ink: #152b36; --muted: #5d7078;
+      --line: #dce4e3; --teal: #007d79; --teal-pale: #e3f4f1;
+      --navy: #102b38; --gold: #dfaa64; --red: #c94f4a;
+      --shadow: 0 12px 34px rgba(23,46,54,.055);
+      --radius: 20px;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body { margin: 0; font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; color: var(--ink); background: var(--bg); line-height: 1.5; }
+    button, input { font: inherit; }
+    button { cursor: pointer; }
+    button:focus-visible, input:focus-visible, label:focus-within { outline: 3px solid rgba(0,125,121,.55); outline-offset: 3px; }
+    .shell { max-width: 1190px; padding: 0 24px; margin: 0 auto; }
+    header { background: var(--bg); }
+    .topbar { display: flex; align-items: center; justify-content: space-between; padding-top: 22px; padding-bottom: 22px; gap: 16px; }
+    .brand { display: inline-flex; align-items: center; gap: 11px; font-size: 13px; letter-spacing: .14em; font-weight: 850; text-transform: uppercase; }
+    .brandmark { display: grid; place-items:center; width: 39px; height: 39px; border-radius: 12px; color: #fff; background: var(--navy); font-size: 15px; letter-spacing: -.06em; }
+    .top-label { color: var(--muted); font-weight: 650; font-size: 12px; text-align: right; }
+    .hero { position: relative; overflow: hidden; display: grid; grid-template-columns: 1.25fr .75fr; align-items: center; gap: 30px; min-height: 282px; padding: 38px 43px; background: var(--navy); border-radius: 26px; color: #fff; box-shadow: 0 14px 35px rgba(16,43,56,.13); }
+    .hero:after { content:""; position:absolute; right: -85px; top:-160px; width: 450px; height:450px; border:1px solid rgba(255,255,255,.10); border-radius:50%; box-shadow: 0 0 0 62px rgba(255,255,255,.025),0 0 0 124px rgba(255,255,255,.018); pointer-events:none; }
+    .kicker { display:inline-flex; align-items:center; gap: 9px; font-size: 11px; letter-spacing: .17em; font-weight:800; text-transform:uppercase; color:#95d8c8; }
+    .kicker i { display:inline-block; width:7px; height:7px; background:#8fddc7; border-radius:50%; }
+    h1 { font-weight:850; letter-spacing:-.055em; font-size: clamp(32px, 4.4vw, 57px); line-height:1.02; margin:19px 0 16px; max-width: 610px; }
+    .hero p { color:#c0d1d5; margin:0; font-size:14px; max-width:480px; }
+    .hero .details { display:flex; flex-wrap:wrap; gap:8px; margin-top:23px; }
+    .tag { border:1px solid rgba(255,255,255,.22); padding:5px 10px; border-radius:99px; font-size:11px; font-weight:700; color:#e8f1f1; }
+    .hero-cost { position:relative; z-index:1; padding:24px; border-radius:20px; border: 1px solid rgba(255,255,255,.18); background: rgba(255,255,255,.08); backdrop-filter: blur(6px); }
+    .hero-cost .eyebrow { color:#d1e6e7; font-size:12px; font-weight:750; }
+    .hero-cost .price { color:#fff; font-size:clamp(38px,4.5vw,57px); font-weight:850; letter-spacing:-.055em; line-height:1.2; margin:4px 0 5px; font-variant-numeric: tabular-nums; }
+    .hero-cost .sub { font-size:12px; color:#c6d9d9; }
+    .hero-cost .line { height:1px; margin:19px 0 14px; background:rgba(255,255,255,.22); }
+    .hero-cost .group-row { display:flex; justify-content:space-between; gap:10px; align-items:center; font-size:13px; }
+    .hero-cost .group-row strong { font-size:19px; font-variant-numeric:tabular-nums; }
+    .main { display:grid; grid-template-columns: minmax(0, 1.04fr) minmax(350px, .96fr); align-items:start; gap:24px; padding-top: 27px; padding-bottom:36px; }
+    .stack { display:grid; gap:20px; min-width:0; }
+    .panel { background: var(--paper); border:1px solid #e3eae8; padding:25px; border-radius:var(--radius); box-shadow:var(--shadow); min-width:0; }
+    .panel-head { display:flex; align-items:flex-start; justify-content:space-between; gap:12px; margin-bottom:19px; }
+    .section-id { color: var(--teal); font-size:11px; font-weight:850; letter-spacing:.13em; text-transform:uppercase; margin:0 0 5px; }
+    h2 { font-size:21px; margin:0; letter-spacing:-.035em; line-height:1.25; }
+    h3 { font-size:15px; margin:0; }
+    .helper { color:var(--muted); margin:7px 0 0; font-size:12px; }
+    .scenario-list { display:grid; gap:10px; }
+    .scenario-card { display:flex; align-items:flex-start; gap:13px; border: 1.5px solid var(--line); padding:15px; border-radius:14px; cursor:pointer; transition: .18s ease; position:relative; }
+    .scenario-card:hover { border-color:#8cbbb7; }
+    .scenario-card.selected { background:#eaf6f3; border-color:var(--teal); box-shadow: inset 0 0 0 .5px var(--teal); }
+    .scenario-card input { accent-color:var(--teal); width:18px; height:18px; margin:4px 0 0; flex-shrink:0; }
+    .scenario-card .title { display:block; font-size:14px; font-weight:800; }
+    .scenario-card .desc { display:block; color:var(--muted); font-size:12px; margin-top:4px; }
+    .scenario-card .date { display:block; color:var(--teal); font-size:11px; font-weight:750; margin-top:6px; }
+    .route-toggle { display:grid; grid-template-columns:1fr 1fr; gap:8px; padding:5px; background:#edf1ef; border-radius:13px; }
+    .route-toggle button { border:0; color:#4d6570; background:transparent; padding:12px 7px; border-radius:9px; font-weight:800; font-size:12px; }
+    .route-toggle button.active { background:var(--paper); box-shadow:0 2px 8px rgba(16,43,56,.10); color:var(--ink); }
+    .route-footnote { font-size:12px; color:var(--muted); margin:12px 0 0; }
+    .choice-grid { display:grid; gap:17px; }
+    .form-row { display:flex; align-items:center; justify-content:space-between; gap:12px; }
+    .form-label { font-size:13px; font-weight:800; color:var(--ink); }
+    .form-sub { font-size:11px; color:var(--muted); }
+    .stepper { display:flex; align-items:center; gap:12px; }
+    .stepper button { width:38px; height:38px; border:1px solid #cedbd9; background:#fff; border-radius:11px; font-size:22px; color:var(--ink); font-weight:600; line-height:1; }
+    .stepper button:hover { background:#e9f5f3; border-color:#83b9b3; }
+    .stepper button:disabled { opacity:.4; cursor:not-allowed; }
+    #travelers-number { color:var(--ink); font-size:25px; font-weight:850; min-width:36px; text-align:center; font-variant-numeric:tabular-nums; }
+    .meta-pills { display:flex; gap:8px; flex-wrap:wrap; }
+    .meta-pill { color:#40575f; background:#f2f6f5; padding:7px 11px; border-radius:9px; font-size:11px; font-weight:750; }
+    .divider { height:1px; background:var(--line); margin:3px 0; }
+    .money-input-wrap { display:flex; align-items:center; border:1px solid #b9ccca; border-radius:11px; padding:0 12px; background:#fff; min-width:110px; }
+    .money-input-wrap:focus-within { box-shadow:0 0 0 3px rgba(0,125,121,.12); border-color:var(--teal); }
+    .money-input-wrap span { color:#506b70; font-weight:800; }
+    .money-input-wrap input { width:80px; border:0; outline:0; background:transparent; padding:11px 0 11px 5px; font-weight:800; color:var(--ink); font-variant-numeric:tabular-nums; }
+    input[type="number"] { appearance:textfield; -moz-appearance:textfield; }
+    input::-webkit-inner-spin-button,input::-webkit-outer-spin-button { -webkit-appearance:none; margin:0; }
+    .subtle-note { color:var(--muted); font-size:11px; margin: 0; }
+    .preset-row { display:flex; flex-wrap:wrap; gap:8px; }
+    .preset { font-size:12px; font-weight:750; padding:8px 13px; background:#fff; border:1px solid #ccdbd8; border-radius:10px; color:#45606a; }
+    .preset.active { color:#006b67; background:#e5f4f0; border-color:#70b9ae; }
+    details { border:1px solid var(--line); border-radius:12px; padding:13px 15px; }
+    summary { cursor:pointer; font-size:13px; font-weight:800; }
+    .ticket-fields { display:grid; gap:12px; padding-top:16px; }
+    .ticket-field { display:flex; justify-content:space-between; align-items:center; gap:14px; font-size:12px; }
+    .ticket-field .money-input-wrap { min-width:98px; }
+    .ticket-field .money-input-wrap input { width:58px; }
+    .right-side { position:sticky; top:20px; }
+    .trip-header { display:flex; align-items:center; justify-content:space-between; gap:12px; }
+    .number-badge { background:var(--teal-pale); color:#006763; padding:6px 10px; border-radius:999px; font-size:11px; font-weight:800; white-space:nowrap; }
+    .itinerary { display:grid; gap:0; margin-top:7px; }
+    .day-row { display:grid; grid-template-columns:77px 1fr; gap:14px; padding:13px 0; border-bottom:1px solid #edf1f0; }
+    .day-row:last-child { border-bottom:0; }
+    .day-date { font-size:11px; color:var(--teal); font-weight:850; padding-top:1px; }
+    .day-main { font-size:12px; font-weight:700; }
+    .day-sub { color:var(--muted); font-size:11px; margin-top:2px; }
+    .warning { background:#fff7eb; color:#72511e; padding:12px 14px; border-radius:11px; border:1px solid #f3dfb9; font-size:11px; line-height:1.55; margin-top:11px; }
+    .summary-grid { display:grid; grid-template-columns: 1fr 1fr; gap:9px; margin:16px 0 20px; }
+    .metric { padding:11px 12px; border-radius:12px; background:#f1f6f4; }
+    .metric .m-title { display:block; color:#5c7477; font-size:10px; font-weight:750; }
+    .metric .m-value { display:block; color:var(--ink); font-weight:850; font-size:17px; margin-top:2px; }
+    .cost-table { border-collapse:collapse; width:100%; table-layout:fixed; }
+    .cost-table th { text-align:right; font-size:10px; color:var(--muted); text-transform:uppercase; letter-spacing:.045em; font-weight:850; padding:12px 5px; border-bottom:1px solid var(--line); }
+    .cost-table th:first-child { text-align:left; width:44%; }
+    .cost-table td { font-size:12px; text-align:right; padding:12px 5px; border-bottom:1px solid #edf1f0; color:var(--ink); font-variant-numeric:tabular-nums; }
+    .cost-table td:first-child { text-align:left; font-weight:650; }
+    .cost-table tfoot td { background:#eaf5f2; border-top:1px solid #c7e2dc; border-bottom:0; font-weight:900; padding:14px 5px; }
+    .cost-table tfoot td:first-child { border-radius:9px 0 0 9px; }
+    .cost-table tfoot td:last-child { border-radius:0 9px 9px 0; }
+    .buttons { display:grid; grid-template-columns:1fr 1fr; gap:9px; margin-top:18px; }
+    .action { border:1px solid var(--teal); color:#fff; background:var(--teal); border-radius:11px; padding:13px 11px; font-size:12px; font-weight:850; }
+    .action.secondary { color:var(--ink); background:#fff; border-color:#cbdad8; }
+    .action:hover { filter:brightness(.96); }
+    .comparison { background:var(--paper); border:1px solid #e3eae8; border-radius:var(--radius); padding:24px; margin: 0 auto 33px; box-shadow:var(--shadow); }
+    .comparison-scroll { overflow:auto; }
+    .compare-table { width:100%; border-collapse:collapse; min-width:490px; margin-top:10px; }
+    .compare-table th { text-align:left; color:var(--muted); font-size:11px; border-bottom:1px solid var(--line); padding:12px; }
+    .compare-table td { border-bottom:1px solid #edf1f0; padding:15px 12px; font-size:12px; }
+    .compare-table tr:last-child td { border-bottom:0; }
+    .compare-table th:not(:first-child), .compare-table td:not(:first-child) { text-align:right; }
+    .compare-table tr.current { background:#e9f5f2; }
+    .compare-table strong { font-size:15px; color:var(--ink); }
+    .footer { display:flex; align-items:start; justify-content:space-between; gap:30px; padding-bottom:32px; color:var(--muted); font-size:11px; }
+    .footer p { max-width:740px; margin:0; }
+    .sr-only { position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; }
+    #toast { position:fixed; bottom:24px; left:50%; transform:translate(-50%,20px); opacity:0; pointer-events:none; background:var(--navy); color:#fff; padding:12px 19px; font-size:12px; font-weight:700; border-radius:12px; box-shadow:0 12px 35px #0003; transition: all .2s; z-index:10; }
+    #toast.show { opacity:1; transform:translate(-50%,0); }
+    @media (max-width: 860px) {
+      .hero { grid-template-columns:1fr; padding:31px; gap:25px; }
+      .hero-cost { max-width:430px; }
+      .main { grid-template-columns: 1fr; }
+      .right-side { position:static; }
+    }
+    @media (max-width: 530px) {
+      .shell { padding-left:13px; padding-right:13px; }
+      .topbar { padding-top:14px; padding-bottom:14px; }
+      .brand { font-size:11px; }
+      .top-label { font-size:10px; }
+      .hero { border-radius:18px; padding:25px 20px; }
+      h1 { font-size:38px; }
+      .hero-cost { padding:18px; }
+      .panel, .comparison { padding:18px 15px; border-radius:16px; }
+      .main { gap:15px; padding-top:15px; }
+      .stack { gap:15px; }
+      .day-row { grid-template-columns:70px 1fr; gap:9px; }
+      .cost-table th, .cost-table td { padding-left:3px; padding-right:3px; }
+      .cost-table td { font-size:11px; }
+      .form-row { align-items:center; }
+      .footer { display:block; }
+    }
+    @media (prefers-reduced-motion: reduce) { *,*:before,*:after { scroll-behavior:auto!important; transition:none!important; } }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="shell topbar">
+      <div class="brand"><span class="brandmark" aria-hidden="true">W18</span><span>Week 18 Road Trip</span></div>
+      <div class="top-label">JANUARY 2027 <span aria-hidden="true">·</span> BUFFALO / TORONTO</div>
+    </div>
+  </header>
+  <div class="shell">
+    <section class="hero" aria-label="Trip overview">
+      <div>
+        <div class="kicker"><i aria-hidden="true"></i> YOUR GAME DAY ROAD TRIP</div>
+        <h1>Three games.<br>One great trip.</h1>
+        <p>Build your Bills, Sabres and Maple Leafs weekend. Compare schedules, split costs, and keep the budget under control.</p>
+        <div class="details"><span class="tag">BUFFALO BILLS</span><span class="tag">BUFFALO SABRES</span><span class="tag" id="leafs-hero-tag">TORONTO MAPLE LEAFS</span></div>
+      </div>
+      <div class="hero-cost" aria-live="polite" aria-atomic="true">
+        <div class="eyebrow">ESTIMATED COST PER PERSON</div>
+        <div class="price" id="hero-person-cost">$0</div>
+        <div class="sub" id="hero-person-sub">3 people sharing costs</div>
+        <div class="line"></div>
+        <div class="group-row"><span>Entire group</span><strong id="hero-group-cost">$0</strong></div>
+      </div>
+    </section>
+  </div>
+  <main class="shell main">
+    <div class="stack">
+      <section class="panel" aria-labelledby="scenario-heading">
+        <div class="panel-head"><div><p class="section-id">01 / THE SCHEDULE</p><h2 id="scenario-heading">Choose your scenario</h2><p class="helper">Your dates and hotel nights adjust automatically.</p></div></div>
+        <div class="scenario-list" id="scenario-list">
+          <label class="scenario-card selected" data-scenario="1"><input type="radio" name="scenario" value="1" checked><span><span class="title">Scenario 1 <span style="color:#477478;font-weight:650">/ Original weekend</span></span><span class="desc">Sabres Saturday · Bills Sunday</span><span class="date">Arrive Friday, January 8</span></span></label>
+          <label class="scenario-card" data-scenario="2"><input type="radio" name="scenario" value="2"><span><span class="title">Scenario 2 <span style="color:#477478;font-weight:650">/ Saturday conflict</span></span><span class="desc">Bills Saturday · Sabres Tuesday</span><span class="date">Arrive Saturday, January 9</span></span></label>
+          <label class="scenario-card" data-scenario="3"><input type="radio" name="scenario" value="3"><span><span class="title">Scenario 3 <span style="color:#477478;font-weight:650">/ Doubleheader</span></span><span class="desc">Bills Saturday 1 PM · Sabres Saturday 7 PM</span><span class="date">Arrive Friday, January 8</span></span></label>
+        </div>
+      </section>
+      <section class="panel" aria-labelledby="route-heading">
+        <div class="panel-head"><div><p class="section-id">02 / THE ROUTE</p><h2 id="route-heading">Add the Leafs game?</h2><p class="helper">Toronto adds the Monday home game and necessary hotel stay.</p></div></div>
+        <div class="route-toggle" role="group" aria-label="Include Toronto game">
+          <button type="button" id="buffalo-only" aria-pressed="false">Buffalo only</button>
+          <button type="button" id="with-toronto" aria-pressed="true" class="active">Buffalo + Toronto</button>
+        </div>
+        <p class="route-footnote" id="route-note">Includes the Leafs game Monday, January 11, at 7:30 PM, plus the travel and hotel costs.</p>
+      </section>
+      <section class="panel" aria-labelledby="budget-heading">
+        <div class="panel-head"><div><p class="section-id">03 / THE GROUP</p><h2 id="budget-heading">Customize your budget</h2><p class="helper">All shared expenses are split evenly per traveler.</p></div></div>
+        <div class="choice-grid">
+          <div class="form-row"><div><div class="form-label">Number of travelers</div><div class="form-sub">Add as many as you need</div></div><div class="stepper"><button type="button" id="decrease-people" aria-label="Remove one traveler">−</button><span id="travelers-number" aria-live="polite">3</span><button type="button" id="increase-people" aria-label="Add one traveler">+</button></div></div>
+          <div class="meta-pills"><span class="meta-pill" id="room-pill">1 hotel room</span><span class="meta-pill" id="vehicle-pill">1 vehicle</span></div>
+          <div class="divider"></div>
+          <div class="form-row"><div><label class="form-label" for="hotel-rate">Hotel price per night</label><div class="form-sub">Per room, before tax · USD</div></div><div class="money-input-wrap"><span aria-hidden="true">$</span><input type="number" min="0" max="100000" step="10" id="hotel-rate" value="270" inputmode="decimal"></div></div>
+          <div class="divider"></div>
+          <div class="form-row"><div><label class="form-label" for="food-daily">Food &amp; drinks per day</label><div class="form-sub">Per person · USD</div></div><div class="money-input-wrap"><span aria-hidden="true">$</span><input type="number" min="0" max="100000" step="5" id="food-daily" value="55" inputmode="decimal"></div></div>
+          <div class="preset-row" id="food-presets"><button type="button" class="preset" data-food="30">$30/day</button><button type="button" class="preset active" data-food="55">$55/day</button><button type="button" class="preset" data-food="75">$75/day</button><button type="button" class="preset" data-food="100">$100/day</button></div>
+          <p class="subtle-note" id="food-note">Food and drinks for the full trip: $275 per person.</p>
+          <details><summary>Edit ticket price assumptions</summary><div class="ticket-fields">
+            <label class="ticket-field"><span>Bills ticket / person</span><span class="money-input-wrap"><span aria-hidden="true">$</span><input id="bills-price" type="number" min="0" step="5" value="225"></span></label>
+            <label class="ticket-field"><span>Sabres ticket / person</span><span class="money-input-wrap"><span aria-hidden="true">$</span><input id="sabres-price" type="number" min="0" step="5" value="75"></span></label>
+            <label class="ticket-field"><span>Leafs ticket / person</span><span class="money-input-wrap"><span aria-hidden="true">$</span><input id="leafs-price" type="number" min="0" step="5" value="145"></span></label>
+            <p class="subtle-note">Ticket prices are estimates, not live purchase quotes. Change them when you find actual seats.</p>
+          </div></details>
+        </div>
+      </section>
+    </div>
+    <aside class="stack right-side" aria-label="Your calculated trip">
+      <section class="panel" aria-labelledby="itinerary-heading">
+        <div class="trip-header"><div><p class="section-id">YOUR PLAN</p><h2 id="itinerary-heading">Trip itinerary</h2></div><span class="number-badge" id="days-badge">5 days</span></div>
+        <div class="summary-grid"><div class="metric"><span class="m-title">CHECK IN</span><span class="m-value" id="checkin-stat">Jan 8</span></div><div class="metric"><span class="m-title">TRAVEL HOME</span><span class="m-value" id="departure-stat">Jan 12</span></div><div class="metric"><span class="m-title">HOTEL NIGHTS</span><span class="m-value" id="nights-stat">4</span></div><div class="metric"><span class="m-title">HOME GAMES</span><span class="m-value" id="games-stat">3</span></div></div>
+        <div class="itinerary" id="itinerary-list"></div>
+        <div class="warning" id="schedule-warning" role="note">Bills Week 18 kickoff is not final. Check the NFL schedule before committing to nonrefundable travel.</div>
+      </section>
+      <section class="panel" aria-labelledby="breakdown-heading">
+        <div class="panel-head" style="margin-bottom:4px"><div><p class="section-id">THE NUMBERS</p><h2 id="breakdown-heading">Cost breakdown</h2><p class="helper">USD · automatically split across your group</p></div></div>
+        <table class="cost-table"><thead><tr><th scope="col">Expense</th><th scope="col">Group</th><th scope="col">Per person</th></tr></thead><tbody id="cost-rows"></tbody><tfoot><tr><td>Total</td><td id="table-group-total">$0</td><td id="table-person-total">$0</td></tr></tfoot></table>
+        <div class="buttons"><button class="action" type="button" id="copy-summary">Copy estimate</button><button class="action secondary" type="button" id="reset">Reset</button></div>
+      </section>
+    </aside>
+  </main>
+  <section class="shell"><div class="comparison"><p class="section-id">SIDE BY SIDE</p><h2>Compare all three scenarios</h2><p class="helper">Using your current group size, prices, and Toronto choice. Select a scenario above to update the trip.</p><div class="comparison-scroll"><table class="compare-table"><thead><tr><th>Scenario</th><th>Nights</th><th>Group total</th><th>Per person</th></tr></thead><tbody id="comparison-rows"></tbody></table></div></div></section>
+  <footer class="shell footer"><p><strong>Planning estimates only.</strong> Games are assumed to be home games on the dates discussed. The NFL has not finalized Week 18 kickoff times. Scenario 3 requires a Saturday 1 PM Bills kickoff and adequate travel time between Orchard Park and KeyBank Center. Hotels are modeled at up to 4 guests per room; vehicle costs assume up to 5 travelers per vehicle. Fuel, parking, tolls, hotel taxes (estimated 16%), and food are approximate and may differ in practice.</p><span>Made for your Week 18 road trip · 2027</span></footer>
+  <div id="toast" role="status" aria-live="polite"></div>
+  <script>
+  (function () {
+    'use strict';
+    var DEFAULTS = { scenario:'1', toronto:true, people:3, hotelRate:270, foodDaily:55, billsPrice:225, sabresPrice:75, leafsPrice:145 };
+    var state = Object.assign({}, DEFAULTS);
+    try {
+      var saved = JSON.parse(localStorage.getItem('week18-budget-v1') || 'null');
+      if (saved && typeof saved === 'object') {
+        for (var key in DEFAULTS) if (Object.prototype.hasOwnProperty.call(saved,key)) state[key] = saved[key];
+      }
+    } catch (e) {}
+    function numeric(value, fallback) { var n = Number(value); return Number.isFinite(n) ? Math.max(0, Math.min(100000, n)) : fallback; }
+    function currency(n) { return '$' + Math.round(n).toLocaleString('en-US'); }
+    function byId(id) { return document.getElementById(id); }
+    function calc(scenario) {
+      var sc = scenario || state.scenario;
+      var p = Math.max(1, Math.floor(numeric(state.people,3)));
+      var rooms = Math.ceil(p/4), vehicles = Math.ceil(p/5);
+      var nights = sc==='2' ? 4 : (state.toronto ? 4 : 3);
+      var days = nights+1;
+      var hotel = nights*numeric(state.hotelRate,270)*rooms;
+      var tax = Math.round(hotel*.16);
+      var bills = numeric(state.billsPrice,225)*p;
+      var sabres = numeric(state.sabresPrice,75)*p;
+      var leafs = state.toronto?numeric(state.leafsPrice,145)*p:0;
+      var fuel = (state.toronto ? (sc==='2'?300:280):240)*vehicles;
+      var parking = (state.toronto ? (sc==='2'?220:200):150)*vehicles;
+      var food = numeric(state.foodDaily,55)*days*p;
+      return {p:p,rooms:rooms,vehicles:vehicles,nights:nights,days:days,hotel:hotel,tax:tax,bills:bills,sabres:sabres,leafs:leafs,fuel:fuel,parking:parking,food:food,total:hotel+tax+bills+sabres+leafs+fuel+parking+food};
+    }
+    function schedule() {
+      var sc=state.scenario, t=state.toronto;
+      var rows=[];
+      if (sc !=='2') rows.push({day:'FRI · JAN 8',title:'Arrive in Buffalo',note:'Check in and settle into the city.'});
+      if (sc==='1') {
+        rows.push({day:'SAT · JAN 9',title:'Sabres vs. Hurricanes',note:'7:00 PM · KeyBank Center, Buffalo'});
+        rows.push({day:'SUN · JAN 10',title:'Bills vs. Jets',note:'Kickoff TBD · Highmark Stadium, Orchard Park'});
+      } else if(sc==='2') {
+        rows.push({day:'SAT · JAN 9',title:'Arrive + Bills vs. Jets',note:'Buffalo home game · kickoff TBD'});
+        rows.push({day:'SUN · JAN 10',title:'Free day in Buffalo',note:'Explore the city or relax.'});
+      } else {
+        rows.push({day:'SAT · JAN 9',title:'Bills + Sabres doubleheader',note:'Bills 1:00 PM · Sabres 7:00 PM'});
+        rows.push({day:'SUN · JAN 10',title:'Free day in Buffalo',note:'Explore the city or relax.'});
+      }
+      rows.push({day:'MON · JAN 11',title:t?'Maple Leafs vs. Jets':'Travel home',note:t?'7:30 PM · Scotiabank Arena, Toronto':'Drive home from Buffalo.'});
+      if (sc==='2') {
+        rows.push({day:'TUE · JAN 12',title:'Sabres vs. Devils',note:'7:00 PM · KeyBank Center, Buffalo'});
+        rows.push({day:'WED · JAN 13',title:'Travel home',note:'Drive home from Buffalo.'});
+      } else if (t) rows.push({day:'TUE · JAN 12',title:'Travel home',note:'Drive home from Toronto.'});
+      return rows;
+    }
+    function elem(tag, className, value) { var el=document.createElement(tag); if(className) el.className=className; if (value!==undefined) el.textContent=value; return el; }
+    function render() {
+      var c=calc();
+      document.querySelectorAll('.scenario-card').forEach(function(card) {
+        var active=card.dataset.scenario===state.scenario;
+        card.classList.toggle('selected',active);
+        card.querySelector('input').checked=active;
+      });
+      byId('buffalo-only').classList.toggle('active',!state.toronto);
+      byId('with-toronto').classList.toggle('active',state.toronto);
+      byId('buffalo-only').setAttribute('aria-pressed',String(!state.toronto));
+      byId('with-toronto').setAttribute('aria-pressed',String(state.toronto));
+      byId('route-note').textContent=state.toronto?'Includes the Leafs game Monday, January 11 at 7:30 PM, with Toronto travel and hotel costs.':'Bills and Sabres at home only. No Toronto hotel, Leafs tickets or Canada travel costs.';
+      byId('leafs-hero-tag').hidden=!state.toronto;
+      byId('travelers-number').textContent=String(c.p);
+      byId('decrease-people').disabled=c.p<=1;
+      byId('room-pill').textContent=c.rooms+' hotel '+(c.rooms===1?'room':'rooms');
+      byId('vehicle-pill').textContent=c.vehicles+' '+(c.vehicles===1?'vehicle':'vehicles');
+      byId('hero-person-cost').textContent=currency(c.total/c.p);
+      byId('hero-person-sub').textContent=c.p+' '+(c.p===1?'traveler':'travelers')+' sharing group expenses';
+      byId('hero-group-cost').textContent=currency(c.total);
+      byId('food-note').textContent='Food and drinks for the full trip: '+currency(c.food/c.p)+' per person ('+c.days+' days).';
+      document.querySelectorAll('.preset').forEach(function(button){button.classList.toggle('active',Number(button.dataset.food)===numeric(state.foodDaily,55));});
+      byId('checkin-stat').textContent=state.scenario==='2'?'Jan 9':'Jan 8';
+      byId('departure-stat').textContent=state.scenario==='2'?'Jan 13':state.toronto?'Jan 12':'Jan 11';
+      byId('nights-stat').textContent=String(c.nights);
+      byId('games-stat').textContent=state.toronto?'3':'2';
+      byId('days-badge').textContent=c.days+' days';
+      var itinerary=byId('itinerary-list'); itinerary.replaceChildren();
+      schedule().forEach(function(day){
+        var r=elem('div','day-row'); var date=elem('span','day-date',day.day);
+        var copy=elem('div'); copy.append(elem('div','day-main',day.title),elem('div','day-sub',day.note));r.append(date,copy);itinerary.append(r);
+      });
+      byId('schedule-warning').textContent=state.scenario==='3'?'Scenario 3 requires the Bills to play Saturday at 1 PM. Plan carefully for transit between the stadium and arena; kickoff has not been confirmed.':state.scenario==='2'?'Scenario 2 uses the Tuesday, January 12 Sabres home game. If Toronto is included, return from Toronto to Buffalo for Tuesday evening.':'The Bills’ Week 18 kickoff day and time have not been finalized. Check before booking nonrefundable travel.';
+      var breakdown=[['Hotels ('+c.nights+' nights)',c.hotel],['Hotel taxes',c.tax],['Bills tickets',c.bills],['Sabres tickets',c.sabres]];
+      if(state.toronto)breakdown.push(['Leafs tickets',c.leafs]);
+      breakdown.push(['Fuel',c.fuel],['Parking & tolls',c.parking],['Food & drinks',c.food]);
+      var tbody=byId('cost-rows'); tbody.replaceChildren();
+      breakdown.forEach(function(item){var tr=elem('tr');tr.append(elem('td','',item[0]),elem('td','',currency(item[1])),elem('td','',currency(item[1]/c.p)));tbody.append(tr);});
+      byId('table-group-total').textContent=currency(c.total);
+      byId('table-person-total').textContent=currency(c.total/c.p);
+      var comparison=byId('comparison-rows');comparison.replaceChildren();
+      [['1','Original weekend'],['2','Saturday conflict'],['3','Saturday doubleheader']].forEach(function(item){
+        var x=calc(item[0]),tr=elem('tr');tr.classList.toggle('current',item[0]===state.scenario);
+        tr.append(elem('td','',item[0]+'. '+item[1]),elem('td','',String(x.nights)),elem('td','',currency(x.total)),elem('td','',currency(x.total/x.p)));
+        comparison.append(tr);
+      });
+      try {localStorage.setItem('week18-budget-v1',JSON.stringify(state));} catch(e){}
+    }
+    function setNumber(key,id){
+      byId(id).addEventListener('input',function(e){state[key]=numeric(e.target.value,0);render();});
+      byId(id).addEventListener('blur',function(e){e.target.value=String(numeric(e.target.value,0));});
+    }
+    document.querySelectorAll('input[name="scenario"]').forEach(function(input){input.addEventListener('change',function(){state.scenario=input.value;render();});});
+    byId('buffalo-only').addEventListener('click',function(){state.toronto=false;render();});
+    byId('with-toronto').addEventListener('click',function(){state.toronto=true;render();});
+    byId('decrease-people').addEventListener('click',function(){state.people=Math.max(1,state.people-1);render();});
+    byId('increase-people').addEventListener('click',function(){state.people=state.people+1;render();});
+    setNumber('hotelRate','hotel-rate');setNumber('foodDaily','food-daily');setNumber('billsPrice','bills-price');setNumber('sabresPrice','sabres-price');setNumber('leafsPrice','leafs-price');
+    document.querySelectorAll('[data-food]').forEach(function(button){button.addEventListener('click',function(){state.foodDaily=Number(button.dataset.food);byId('food-daily').value=String(state.foodDaily);render();});});
+    var toastTimer;
+    function notify(message) {var toast=byId('toast');toast.textContent=message;toast.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(function(){toast.classList.remove('show');},2400);}
+    function summary() {
+      var c=calc();
+      return 'WEEK 18 ROAD TRIP — JANUARY 2027\nScenario '+state.scenario+'\nToronto Maple Leafs: '+(state.toronto?'Included':'Not included')+'\nTravelers: '+c.p+'\nRooms: '+c.rooms+' | Vehicles: '+c.vehicles+'\nHotel nights: '+c.nights+'\nTravel home: '+(state.scenario==='2'?'Jan 13':state.toronto?'Jan 12':'Jan 11')+'\n\nEXPENSES (GROUP / PER PERSON)\n'+[['Hotels',c.hotel],['Hotel taxes',c.tax],['Bills tickets',c.bills],['Sabres tickets',c.sabres],...(state.toronto?[['Leafs tickets',c.leafs]]:[]),['Fuel',c.fuel],['Parking & tolls',c.parking],['Food and drinks',c.food]].map(function(x){return x[0]+': '+currency(x[1])+' / '+currency(x[1]/c.p);}).join('\n')+'\n\nGROUP TOTAL: '+currency(c.total)+'\nPER PERSON: '+currency(c.total/c.p)+'\n\nPlanning estimates only. NFL Week 18 kickoff is not final.';
+    }
+    byId('copy-summary').addEventListener('click',function(){
+      var text=summary();
+      if(navigator.clipboard && navigator.clipboard.writeText){navigator.clipboard.writeText(text).then(function(){notify('Cost estimate copied!');}).catch(function(){fallbackCopy(text);});}
+      else fallbackCopy(text);
+    });
+    function fallbackCopy(text) {var area=elem('textarea');area.value=text;area.style.cssText='position:fixed;top:-1000px;left:-1000px';document.body.append(area);area.select();try{document.execCommand('copy');notify('Cost estimate copied!');}catch(e){notify('Copy unavailable in this browser');}area.remove();}
+    byId('reset').addEventListener('click',function(){state=Object.assign({},DEFAULTS);['hotel-rate','food-daily','bills-price','sabres-price','leafs-price'].forEach(function(id,index){byId(id).value=[state.hotelRate,state.foodDaily,state.billsPrice,state.sabresPrice,state.leafsPrice][index];});render();notify('Calculator reset');});
+    byId('hotel-rate').value=String(numeric(state.hotelRate,270));
+    byId('food-daily').value=String(numeric(state.foodDaily,55));
+    byId('bills-price').value=String(numeric(state.billsPrice,225));
+    byId('sabres-price').value=String(numeric(state.sabresPrice,75));
+    byId('leafs-price').value=String(numeric(state.leafsPrice,145));
+    state.people=Math.max(1,Math.floor(numeric(state.people,3)));
+    if(!['1','2','3'].includes(state.scenario))state.scenario='1';
+    state.toronto=Boolean(state.toronto);
+    render();
+  })();
+  </script>
+</body>
+</html>
