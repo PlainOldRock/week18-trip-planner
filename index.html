@@ -70,6 +70,10 @@ input::-webkit-inner-spin-button,input::-webkit-outer-spin-button { -webkit-appe
 .preset-row { display:flex; gap:7px; flex-wrap:wrap; }
 .preset { padding:8px 11px; border:1px solid #000; border-radius:0; background:#fff; color:#000; font-weight:700; font-size:12px; }
 .preset.active { background:#000; color:#fff; border-color:#000; }
+.booked-hotel { border:1px solid #000; padding:14px; display:grid; gap:4px; }
+.booked-hotel strong { font-size:17px; font-variant-numeric:tabular-nums; }
+.booked-hotel p { margin:0; font-size:12px; }
+.booked-hotel small { font-size:11px; }
 .food-day-rows { border-top:1px solid #000; }
 .food-day-row { display:flex; gap:12px; justify-content:space-between; align-items:center; padding:9px 0; border-bottom:1px solid #000; font-size:12px; }
 .food-day-row strong { font-variant-numeric:tabular-nums; white-space:nowrap; }
@@ -196,8 +200,14 @@ summary { cursor:pointer; font-size:13px; font-weight:800; }
         <div class="choice-grid">
           <div class="form-row"><div><div class="form-label">Number of travelers</div><div class="form-sub">Add as many as you need</div></div><div class="stepper"><button type="button" id="decrease-people" aria-label="Remove one traveler">−</button><span id="travelers-number" aria-live="polite">3</span><button type="button" id="increase-people" aria-label="Add one traveler">+</button></div></div>
           <div class="meta-pills"><span class="meta-pill" id="room-pill">1 hotel room</span><span class="meta-pill" id="vehicle-pill">1 vehicle</span></div>
+          <div class="booked-hotel">
+            <span class="form-label">Buffalo hotel — booked</span>
+            <p>January 8–11, 2027 · 3 nights · 1 room</p>
+            <strong>$1,090.57 USD + 22,000 points</strong>
+            <small>Includes $156.46 in taxes. This confirmed booking is counted once across all scenarios.</small>
+          </div>
           <div class="divider"></div>
-          <div class="form-row"><div><label class="form-label" for="hotel-rate">Hotel price per night</label><div class="form-sub">Per room, before tax · USD</div></div><div class="money-input-wrap"><span aria-hidden="true">$</span><input type="number" min="0" max="100000" step="10" id="hotel-rate" value="270" inputmode="decimal"></div></div>
+          <div class="form-row"><div><label class="form-label" for="hotel-rate">Additional hotel room / night</label><div class="form-sub">Estimate for extra rooms or nights · USD before tax</div></div><div class="money-input-wrap"><span aria-hidden="true">$</span><input type="number" min="0" max="100000" step="10" id="hotel-rate" value="270" inputmode="decimal"></div></div>
           <div class="divider"></div>
           <div class="form-row"><div><label class="form-label" for="food-daily">Food &amp; drinks per day</label><div class="form-sub">Base daily spending per person · USD</div></div><div class="money-input-wrap"><span aria-hidden="true">$</span><input type="number" min="0" max="100000" step="5" id="food-daily" value="100" inputmode="decimal"></div></div>
           <div class="preset-row" id="food-presets"><button type="button" class="preset" data-food="50">$50/day</button><button type="button" class="preset" data-food="75">$75/day</button><button type="button" class="preset active" data-food="100">$100/day</button><button type="button" class="preset" data-food="150">$150/day</button></div>
@@ -228,7 +238,7 @@ summary { cursor:pointer; font-size:13px; font-weight:800; }
     </aside>
   </main>
   <section class="shell"><div class="comparison"><p class="section-id">SIDE BY SIDE</p><h2>Compare all three scenarios</h2><p class="helper">Using your current group size, prices, and Toronto choice. Select a scenario above to update the trip.</p><div class="comparison-scroll"><table class="compare-table"><thead><tr><th>Scenario</th><th>Nights</th><th>Group total</th><th>Per person</th></tr></thead><tbody id="comparison-rows"></tbody></table></div></div></section>
-  <footer class="shell footer"><p><strong>Planning estimates only.</strong> Games are assumed to be home games on the dates discussed. The NFL has not finalized Week 18 kickoff times. Scenario 3 requires a Saturday 1 PM Bills kickoff and adequate travel time between Orchard Park and KeyBank Center. Hotels are modeled at up to 4 guests per room; vehicle costs assume up to 5 travelers per vehicle. Fuel, parking, tolls, hotel taxes (estimated 16%), and food are approximate and may differ in practice.</p><span>Made for your Week 18 road trip · 2027</span></footer>
+  <footer class="shell footer"><p><strong>Confirmed Buffalo hotel:</strong> $1,090.57 cash plus 22,000 points for one room January 8–11. Extra rooms and nights are estimated. <strong>Planning estimates only.</strong> Games are assumed to be home games on the dates discussed. The NFL has not finalized Week 18 kickoff times. Scenario 3 requires a Saturday 1 PM Bills kickoff and adequate travel time between Orchard Park and KeyBank Center. Hotels are modeled at up to 4 guests per room; vehicle costs assume up to 5 travelers per vehicle. Fuel, parking, tolls, hotel taxes (estimated 16%), and food are approximate and may differ in practice.</p><span>Made for your Week 18 road trip · 2027</span></footer>
   <div class="sticky-total" aria-label="Live trip cost" aria-live="polite" aria-atomic="true">
     <div class="shell sticky-inner">
       <div class="sticky-main"><span class="sticky-caption">Cost per person</span><strong id="sticky-person-cost">$0</strong></div>
@@ -253,6 +263,9 @@ summary { cursor:pointer; font-size:13px; font-weight:800; }
     } catch (e) {}
     function numeric(value, fallback) { var n = Number(value); return Number.isFinite(n) ? Math.max(0, Math.min(100000, n)) : fallback; }
     function currency(n) { return '$' + Math.round(n).toLocaleString('en-US'); }
+    function exactCurrency(n) { return '$' + n.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+    var BOOKED_HOTEL_CASH=1090.57;
+    var BOOKED_HOTEL_POINTS=22000;
     function byId(id) { return document.getElementById(id); }
     function foodDayPlan(sc, includeToronto) {
       var dates=sc==='2'?[['Sat, Jan 9',1],['Sun, Jan 10',0],['Mon, Jan 11',includeToronto?1:0],['Tue, Jan 12',1],['Wed, Jan 13',0]]:
@@ -268,8 +281,15 @@ summary { cursor:pointer; font-size:13px; font-weight:800; }
       var rooms = Math.ceil(p/4), vehicles = Math.ceil(p/5);
       var nights = sc==='2' ? 4 : (state.toronto ? 4 : 3);
       var days = nights+1;
-      var hotel = nights*numeric(state.hotelRate,270)*rooms;
-      var tax = Math.round(hotel*.16);
+      // The existing booking covers one Buffalo room January 8-11 regardless of the scenario.
+      // Scenario 2 leaves Friday booked but unused; add Monday and Tuesday nights.
+      var extraRoomNights=Math.max(0,rooms-1)*(sc==='2'?2:3)
+        +(sc==='2'?2:(state.toronto?1:0))*rooms;
+      var estimatedHotelBase=extraRoomNights*numeric(state.hotelRate,270);
+      var estimatedHotelTax=Math.round(estimatedHotelBase*.16*100)/100;
+      var bookedHotelCash=BOOKED_HOTEL_CASH;
+      var hotel=bookedHotelCash+estimatedHotelBase;
+      var tax=estimatedHotelTax;
       var bills = numeric(state.billsPrice,225)*p;
       var sabres = numeric(state.sabresPrice,75)*p;
       var leafs = state.toronto?numeric(state.leafsPrice,145)*p:0;
@@ -278,7 +298,7 @@ summary { cursor:pointer; font-size:13px; font-weight:800; }
       var foodDays = foodDayPlan(sc,state.toronto);
       var foodPerPerson = foodDays.reduce(function(sum,day){return sum+day.amount;},0);
       var food = foodPerPerson*p;
-      return {p:p,rooms:rooms,vehicles:vehicles,nights:nights,days:days,hotel:hotel,tax:tax,bills:bills,sabres:sabres,leafs:leafs,fuel:fuel,parking:parking,food:food,foodDays:foodDays,foodPerPerson:foodPerPerson,total:hotel+tax+bills+sabres+leafs+fuel+parking+food};
+      return {p:p,rooms:rooms,vehicles:vehicles,nights:nights,days:days,hotel:hotel,tax:tax,bookedHotelCash:bookedHotelCash,bookedHotelPoints:BOOKED_HOTEL_POINTS,extraRoomNights:extraRoomNights,estimatedHotelBase:estimatedHotelBase,estimatedHotelTax:estimatedHotelTax,bills:bills,sabres:sabres,leafs:leafs,fuel:fuel,parking:parking,food:food,foodDays:foodDays,foodPerPerson:foodPerPerson,total:hotel+tax+bills+sabres+leafs+fuel+parking+food};
     }
     function schedule() {
       var sc=state.scenario, t=state.toronto;
@@ -344,12 +364,17 @@ summary { cursor:pointer; font-size:13px; font-weight:800; }
         var r=elem('div','day-row'); var date=elem('span','day-date',day.day);
         var copy=elem('div'); copy.append(elem('div','day-main',day.title),elem('div','day-sub',day.note));r.append(date,copy);itinerary.append(r);
       });
-      byId('schedule-warning').textContent=state.scenario==='3'?'Scenario 3 requires the Bills to play Saturday at 1 PM. Plan carefully for transit between the stadium and arena; kickoff has not been confirmed.':state.scenario==='2'?'Scenario 2 uses the Tuesday, January 12 Sabres home game. If Toronto is included, return from Toronto to Buffalo for Tuesday evening.':'The Bills’ Week 18 kickoff day and time have not been finalized. Check before booking nonrefundable travel.';
-      var breakdown=[['Hotels ('+c.nights+' nights)',c.hotel],['Hotel taxes',c.tax],['Bills tickets',c.bills],['Sabres tickets',c.sabres]];
+      byId('schedule-warning').textContent=state.scenario==='3'?'Scenario 3 needs a Saturday 1 PM Bills kickoff, with adequate stadium-to-arena travel time. Your Jan 8–11 Buffalo hotel is included.':state.scenario==='2'?'Your booked Buffalo hotel covers Jan 8–11. If you arrive Saturday, Friday remains charged but unused. Monday and Tuesday need extra hotel nights; return from Toronto for Tuesday’s Sabres game if included.':'Your confirmed Buffalo hotel is included for Jan 8–11. Bills Week 18 kickoff is not final. Confirm dates before adding nonrefundable hotels.';
+      var breakdown=[['Booked Buffalo hotel (tax included)',c.bookedHotelCash]];
+      if(c.extraRoomNights){
+        breakdown.push(['Additional hotel room-nights ('+c.extraRoomNights+')',c.estimatedHotelBase]);
+        breakdown.push(['Estimated taxes on extra rooms',c.estimatedHotelTax]);
+      }
+      breakdown.push(['Bills tickets',c.bills],['Sabres tickets',c.sabres]);
       if(state.toronto)breakdown.push(['Leafs tickets',c.leafs]);
       breakdown.push(['Fuel',c.fuel],['Parking & tolls',c.parking],['Food & drinks',c.food]);
       var tbody=byId('cost-rows'); tbody.replaceChildren();
-      breakdown.forEach(function(item){var tr=elem('tr');tr.append(elem('td','',item[0]),elem('td','',currency(item[1])),elem('td','',currency(item[1]/c.p)));tbody.append(tr);});
+      breakdown.forEach(function(item){var tr=elem('tr'),isBooked=item[0].indexOf('Booked Buffalo hotel')===0;tr.append(elem('td','',item[0]),elem('td','',isBooked?exactCurrency(item[1]):currency(item[1])),elem('td','',isBooked?exactCurrency(item[1]/c.p):currency(item[1]/c.p)));tbody.append(tr);});
       byId('table-group-total').textContent=currency(c.total);
       byId('table-person-total').textContent=currency(c.total/c.p);
       var comparison=byId('comparison-rows');comparison.replaceChildren();
@@ -375,7 +400,7 @@ summary { cursor:pointer; font-size:13px; font-weight:800; }
     function notify(message) {var toast=byId('toast');toast.textContent=message;toast.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(function(){toast.classList.remove('show');},2400);}
     function summary() {
       var c=calc();
-      return 'WEEK 18 ROAD TRIP — JANUARY 2027\nScenario '+state.scenario+'\nToronto Maple Leafs: '+(state.toronto?'Included':'Not included')+'\nTravelers: '+c.p+'\nRooms: '+c.rooms+' | Vehicles: '+c.vehicles+'\nHotel nights: '+c.nights+'\nTravel home: '+(state.scenario==='2'?'Jan 13':state.toronto?'Jan 12':'Jan 11')+'\n\nEXPENSES (GROUP / PER PERSON)\n'+[['Hotels',c.hotel],['Hotel taxes',c.tax],['Bills tickets',c.bills],['Sabres tickets',c.sabres],...(state.toronto?[['Leafs tickets',c.leafs]]:[]),['Fuel',c.fuel],['Parking & tolls',c.parking],['Food and drinks',c.food]].map(function(x){return x[0]+': '+currency(x[1])+' / '+currency(x[1]/c.p);}).join('\n')+'\n\nFOOD & DRINKS / PERSON BY DAY\n'+c.foodDays.map(function(day){return day.label+' ('+day.games+' game(s)): '+currency(day.amount);}).join('\n')+'\n\nGROUP TOTAL: '+currency(c.total)+'\nPER PERSON: '+currency(c.total/c.p)+'\n\nPlanning estimates only. NFL Week 18 kickoff is not final.';
+      return 'WEEK 18 ROAD TRIP — JANUARY 2027\nBooked Buffalo hotel: $1,090.57 + 22,000 reward points (Jan 8–11)\nScenario '+state.scenario+'\nToronto Maple Leafs: '+(state.toronto?'Included':'Not included')+'\nTravelers: '+c.p+'\nRooms: '+c.rooms+' | Vehicles: '+c.vehicles+'\nHotel nights: '+c.nights+'\nTravel home: '+(state.scenario==='2'?'Jan 13':state.toronto?'Jan 12':'Jan 11')+'\n\nEXPENSES (GROUP / PER PERSON)\n'+[['Booked Buffalo hotel (incl. tax)',c.bookedHotelCash],['Additional rooms/nights',c.estimatedHotelBase],['Extra hotel taxes',c.estimatedHotelTax],['Bills tickets',c.bills],['Sabres tickets',c.sabres],...(state.toronto?[['Leafs tickets',c.leafs]]:[]),['Fuel',c.fuel],['Parking & tolls',c.parking],['Food and drinks',c.food]].map(function(x){return x[0]+': '+currency(x[1])+' / '+currency(x[1]/c.p);}).join('\n')+'\n\nFOOD & DRINKS / PERSON BY DAY\n'+c.foodDays.map(function(day){return day.label+' ('+day.games+' game(s)): '+currency(day.amount);}).join('\n')+'\n\nGROUP TOTAL: '+currency(c.total)+'\nPER PERSON: '+currency(c.total/c.p)+'\n\nPlanning estimates only. NFL Week 18 kickoff is not final.';
     }
     byId('copy-summary').addEventListener('click',function(){
       var text=summary();
