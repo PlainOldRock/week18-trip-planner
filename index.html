@@ -1037,6 +1037,99 @@ summary { cursor:pointer; font-size:13px; font-weight:800; }
     document.querySelectorAll('[data-food]').forEach(function(button){button.addEventListener('click',function(){state.foodDaily=Number(button.dataset.food);byId('food-daily').value=String(state.foodDaily);render();});});
     var toastTimer;
     function notify(message) {var toast=byId('toast');toast.textContent=message;toast.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(function(){toast.classList.remove('show');},2400);}
+    // Portable, versioned JSON plan. Only known settings can be imported.
+    function portablePlan(){
+      var settings={};
+      Object.keys(DEFAULTS).forEach(function(key){settings[key]=state[key];});
+      return JSON.stringify({app:'week18-trip-planner',version:1,settings:settings},null,2);
+    }
+    function validatePortablePlan(raw){
+      if(typeof raw!=='string'||raw.length>20000||!raw.trim())throw Error('Paste a saved Week 18 plan first (maximum 20 KB).');
+      var parsed;
+      try{parsed=JSON.parse(raw);}catch(e){throw Error('This is not a valid plan. Copy it using the top-right copy icon.');}
+      if(!parsed||parsed.app!=='week18-trip-planner'||parsed.version!==1||
+        !parsed.settings||typeof parsed.settings!=='object'||Array.isArray(parsed.settings)){
+        throw Error('Unrecognized plan format. Please use a plan copied from this planner.');
+      }
+      if(!Object.prototype.hasOwnProperty.call(parsed.settings,'scenario')){
+        throw Error('This saved plan is missing its scenario selection.');
+      }
+      var next=Object.assign({},DEFAULTS);
+      Object.keys(DEFAULTS).forEach(function(key){
+        if(!Object.prototype.hasOwnProperty.call(parsed.settings,key))return;
+        var value=parsed.settings[key],previous=DEFAULTS[key];
+        if(typeof previous==='boolean'){
+          if(typeof value!=='boolean')throw Error('Invalid setting: '+key);
+        }else if(typeof previous==='number'){
+          if(typeof value!=='number'||!Number.isFinite(value)||value<0||value>100000||
+            (key==='people'&&(value<1||value>100||Math.floor(value)!==value))||
+            (key==='mpg'&&(value<1||value>100))){
+            throw Error('Invalid numeric setting: '+key);
+          }
+        }else if(key==='scenario'){
+          if(!['1','2','3'].includes(value))throw Error('Invalid scenario.');
+        }else if(key==='buffaloStay'){
+          if(value!=='hotel'&&value!=='airbnb')throw Error('Invalid Buffalo stay.');
+        }
+        next[key]=value;
+      });
+      if(next.toronto||next.buffaloStay==='airbnb'){
+        next.scenario1LeaveSunday=false;
+        next.scenario3LeaveSunday=false;
+      }
+      return next;
+    }
+    function syncPlanInputs(){
+      var pairs=[
+        ['hotel-rate','hotelRate'],['food-daily','foodDaily'],
+        ['bills-price','billsPrice'],['sabres-price','sabresPrice'],['leafs-price','leafsPrice'],
+        ['vehicle-mpg','mpg'],['gas-price','gasPrice'],['miles-home-buffalo','milesHomeBuffalo'],
+        ['miles-buffalo-toronto','milesBuffaloToronto'],['miles-toronto-home','milesTorontoHome'],
+        ['miles-local','milesLocal']
+      ];
+      pairs.forEach(function(pair){byId(pair[0]).value=String(state[pair[1]]);});
+    }
+    function setImportError(message){
+      byId('plan-import-error').textContent=message||'';
+      byId('plan-import-error').hidden=!message;
+    }
+    function closePlanDialog(){
+      var dialog=byId('plan-import-dialog');
+      if(typeof dialog.close==='function'&&dialog.open)dialog.close();
+      else dialog.removeAttribute('open');
+    }
+    function pastePlanClipboard(){
+      if(!navigator.clipboard||!navigator.clipboard.readText){
+        setImportError('Clipboard reading is unavailable. Paste your plan in the box manually.');
+        return;
+      }
+      navigator.clipboard.readText().then(function(value){
+        if(!value||!value.trim()){setImportError('The clipboard is empty. Paste a copied plan.');return;}
+        byId('plan-import-text').value=value;
+        setImportError('');
+      }).catch(function(){
+        setImportError('Clipboard access was blocked. Paste into the box manually, then select Restore plan.');
+      });
+    }
+    function openPlanDialog(){
+      setImportError('');
+      byId('plan-import-text').value='';
+      byId('plan-import-file').value='';
+      var dialog=byId('plan-import-dialog');
+      if(typeof dialog.showModal==='function')dialog.showModal();
+      else dialog.setAttribute('open','');
+      pastePlanClipboard();
+    }
+    function restorePlan(){
+      try{
+        var restored=validatePortablePlan(byId('plan-import-text').value);
+        state=restored;
+        syncPlanInputs();
+        render();
+        closePlanDialog();
+        notify('Saved plan restored · '+currency(calc().total/calc().p)+' per person');
+      }catch(e){setImportError(e.message||'Unable to restore this plan.');}
+    }
     function summary() {
       var c=calc();
       return 'WEEK 18 ROAD TRIP — JANUARY 2027\nBuffalo '+(c.buffaloStayType==='airbnb'?'Airbnb':'hotel')+': '+exactCurrency(c.bookedHotelCash)+' ('+(c.saturdayArrival?'Jan 9':'Jan 8')+'–'+(c.sundayReturn?'Jan 10':'Jan 11')+')\nScenario '+state.scenario+'\nToronto Maple Leafs: '+(state.toronto?'Included':'Not included')+'\nFood & drinks in total: '+(c.foodIncluded?'Yes':'No')+'\nTravelers: '+c.p+'\nBuffalo stay units: '+c.rooms+' | Vehicles: '+c.vehicles+'\nArrival: '+(c.saturdayArrival?'Jan 9':'Jan 8')+'\nSunday return: '+(c.sundayReturn?'Yes':'No')+'\nTuesday return: '+(state.scenario==='2'&&c.last===4?'Yes':'No')+'\nLodging nights: '+c.nights+'\nMileage: '+Math.round(c.tripMiles)+' miles, '+c.mpg+' MPG, '+c.totalGallons.toFixed(1)+' total gallons, '+exactCurrency(c.gasPrice)+'/gal\nDriving route: '+c.tripRoute+'\nTravel home: Jan '+(8+c.last)+'\n\nEXPENSES (GROUP / PER PERSON)\n'+[[c.buffaloStayType==='airbnb'?'Buffalo Airbnb (incl. tax)':'Buffalo hotel (incl. tax)',c.bookedHotelCash],['Additional rooms/nights',c.estimatedHotelBase],['Extra hotel taxes',c.estimatedHotelTax],['Bills tickets',c.bills],['Sabres tickets',c.sabres],...(state.toronto?[['Leafs tickets',c.leafs]]:[]),['Fuel ('+Math.round(c.tripMiles)+' mi at '+c.mpg+' MPG, '+c.totalGallons.toFixed(1)+' gallons)',c.fuel],['Parking & tolls',c.parking],['Food and drinks'+(c.foodIncluded?'':' (excluded)'),c.includedFood]].map(function(x){return x[0]+': '+currency(x[1])+' / '+currency(x[1]/c.p);}).join('\n')+'\n\nFOOD & DRINKS / PERSON BY DAY\n'+c.foodDays.map(function(day){return day.label+' ('+day.games+' game(s)): '+currency(day.amount);}).join('\n')+'\n\nGROUP TOTAL: '+currency(c.total)+'\nPER PERSON: '+currency(c.total/c.p)+'\n\nPlanning estimates only. NFL Week 18 kickoff is not final.';
@@ -1080,13 +1173,42 @@ summary { cursor:pointer; font-size:13px; font-weight:800; }
       reader.onerror=function(){err.textContent='Cannot read that file. Try pasting the saved text instead.';};
       reader.readAsText(file);
     });
+    byId('quick-cheapest').addEventListener('click',function(){applyTopShortcut('min');});
+    byId('quick-priciest').addEventListener('click',function(){applyTopShortcut('max');});
+    byId('copy-plan').addEventListener('click',function(){
+      var portable=portablePlan(),message='Plan copied — use the import icon to restore it';
+      if(navigator.clipboard&&navigator.clipboard.writeText){
+        navigator.clipboard.writeText(portable).then(function(){notify(message);})
+          .catch(function(){fallbackCopy(portable,message);});
+      }else fallbackCopy(portable,message);
+    });
+    byId('import-plan').addEventListener('click',openPlanDialog);
+    byId('plan-paste-clipboard').addEventListener('click',pastePlanClipboard);
+    byId('plan-import-apply').addEventListener('click',restorePlan);
+    byId('plan-import-close').addEventListener('click',closePlanDialog);
+    byId('plan-import-file').addEventListener('change',function(e){
+      var file=e.target.files&&e.target.files[0];
+      if(!file)return;
+      if(file.size>20000){setImportError('The file is too large (maximum 20 KB).');return;}
+      if(typeof file.text!=='function'){setImportError('Unable to read this file. Paste the plan as text.');return;}
+      file.text().then(function(value){byId('plan-import-text').value=value;setImportError('');})
+        .catch(function(){setImportError('Unable to read this file.');});
+    });
     byId('copy-summary').addEventListener('click',function(){
       var text=summary();
       if(navigator.clipboard && navigator.clipboard.writeText){navigator.clipboard.writeText(text).then(function(){notify('Cost estimate copied!');}).catch(function(){fallbackCopy(text);});}
       else fallbackCopy(text);
     });
-    function fallbackCopy(text) {var area=elem('textarea');area.value=text;area.style.cssText='position:fixed;top:-1000px;left:-1000px';document.body.append(area);area.select();try{document.execCommand('copy');notify('Cost estimate copied!');}catch(e){notify('Copy unavailable in this browser');}area.remove();}
-    byId('reset').addEventListener('click',function(){state=Object.assign({},DEFAULTS);['hotel-rate','food-daily','bills-price','sabres-price','leafs-price','vehicle-mpg','gas-price','miles-home-buffalo','miles-buffalo-toronto','miles-toronto-home','miles-local'].forEach(function(id,index){byId(id).value=[state.hotelRate,state.foodDaily,state.billsPrice,state.sabresPrice,state.leafsPrice,state.mpg,state.gasPrice,state.milesHomeBuffalo,state.milesBuffaloToronto,state.milesTorontoHome,state.milesLocal][index];});render();notify('Calculator reset');});
+    function fallbackCopy(text,successMessage) {
+      var area=elem('textarea');area.value=text;area.style.cssText='position:fixed;top:-1000px;left:-1000px';
+      document.body.append(area);area.select();
+      try {
+        if(document.execCommand('copy'))notify(successMessage||'Cost estimate copied!');
+        else notify('Clipboard unavailable; try another browser');
+      } catch(e){notify('Copy unavailable in this browser');}
+      area.remove();
+    }
+    byId('reset').addEventListener('click',function(){state=Object.assign({},DEFAULTS);syncPlanInputs();render();notify('Calculator reset');});
     byId('hotel-rate').value=String(numeric(state.hotelRate,270));
     byId('food-daily').value=String(numeric(state.foodDaily,100));
     byId('bills-price').value=String(numeric(state.billsPrice,225));
