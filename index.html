@@ -503,23 +503,29 @@ summary { cursor:pointer; font-size:13px; font-weight:800; }
       days[last].push('car'); // Drive home.
       return {days:days,first:first,last:last};
     }
+    var lastRenderedWeekKey=null;
     function renderTripWeek(c){
-      var days=['FRI 8','SAT 9','SUN 10','MON 11','TUE 12','WED 13','THU 14'];
-      var eventNames={car:'Driving',bills:'Buffalo Bills game',sabres:'Buffalo Sabres game',leafs:'Toronto Maple Leafs game'};
-      var plan=weekEvents(state.scenario,state.toronto,c.saturdayArrival,c.buffaloStayType==='airbnb');
-      var calendar=byId('trip-week-calendar'); calendar.replaceChildren();
-      days.forEach(function(day,index){
-        var active=index>=plan.first&&index<=plan.last;
-        var item=elem('div','mini-day '+(active?'active':'inactive'));
-        var icons=elem('div','mini-day-icons');
-        if(active){
-          if(!plan.days[index].length)icons.append(elem('span','mini-free-day'));
-          else plan.days[index].forEach(function(event){icons.append(event==='car'?miniCar():miniLogo(event));});
-        }
-        item.setAttribute('aria-label',day+': '+(active?(plan.days[index].length?plan.days[index].map(function(x){return eventNames[x];}).join(' and '):'Free day'):'Not on trip'));
-        item.append(elem('span','mini-day-name',day),icons);
-        calendar.append(item);
-      });
+      // Keep logos mounted while price/MPG inputs change, avoiding image flicker.
+      var key=[state.scenario,state.toronto,c.saturdayArrival,c.buffaloStayType].join('|');
+      if(lastRenderedWeekKey!==key){
+        lastRenderedWeekKey=key;
+        var days=['FRI 8','SAT 9','SUN 10','MON 11','TUE 12','WED 13','THU 14'];
+        var eventNames={car:'Driving',bills:'Buffalo Bills game',sabres:'Buffalo Sabres game',leafs:'Toronto Maple Leafs game'};
+        var plan=weekEvents(state.scenario,state.toronto,c.saturdayArrival,c.buffaloStayType==='airbnb');
+        var calendar=byId('trip-week-calendar'); calendar.replaceChildren();
+        days.forEach(function(day,index){
+          var active=index>=plan.first&&index<=plan.last;
+          var item=elem('div','mini-day '+(active?'active':'inactive'));
+          var icons=elem('div','mini-day-icons');
+          if(active){
+            if(!plan.days[index].length)icons.append(elem('span','mini-free-day'));
+            else plan.days[index].forEach(function(event){icons.append(event==='car'?miniCar():miniLogo(event));});
+          }
+          item.setAttribute('aria-label',day+': '+(active?(plan.days[index].length?plan.days[index].map(function(x){return eventNames[x];}).join(' and '):'Free day'):'Not on trip'));
+          item.append(elem('span','mini-day-name',day),icons);
+          calendar.append(item);
+        });
+      }
       byId('sticky-mileage').textContent='~'+Math.round(c.tripMiles).toLocaleString('en-US')+' mi · '+c.mpg.toLocaleString('en-US')+' MPG';
     }
     function render() {
