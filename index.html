@@ -612,6 +612,136 @@ summary { cursor:pointer; font-size:13px; font-weight:800; }
       render();
       notify((kind==='min'?'Cheapest':'Most expensive')+' · '+tripShortcutDescription(estimate)+' · '+currency(estimate.perPerson)+'/person');
     }
+    var quickExtremes=null;
+    function calculateExtremePlans(){
+      // Compare valid itineraries at the current traveler count and editable prices.
+      // Arrival and return choices are scoped to their own scenario; irrelevant flags are reset.
+      var original=state, result={cheapest:null,costliest:null};
+      try {
+        ['1','2','3'].forEach(function(sc){
+          ['hotel','airbnb'].forEach(function(stay){
+            [false,true].forEach(function(toronto){
+              var hotel=stay==='hotel';
+              var arrivalOptions=sc==='1'&&hotel&&!toronto?[false,true]:sc==='2'&&hotel?[false,true]:[false];
+              var departOptions=sc==='1'||sc==='3'
+                ?(hotel&&!toronto?[false,true]:[false])
+                :[false,true];
+              arrivalOptions.forEach(function(arriveEarly){
+                departOptions.forEach(function(departEarly){
+                  var settings={
+                    scenario:sc,toronto:toronto,buffaloStay:stay,
+                    scenario1ArriveSaturday:sc==='1'&&arriveEarly,
+                    scenario1LeaveSunday:sc==='1'&&departEarly,
+                    scenario2ArriveFriday:sc==='2'&&arriveEarly,
+                    scenario2LeaveTuesday:sc==='2'&&departEarly,
+                    scenario3LeaveSunday:sc==='3'&&departEarly
+                  };
+                  state=Object.assign({},original,settings);
+                  var estimate=calc();
+                  var entry={settings:settings,total:estimate.total,perPerson:estimate.total/estimate.p,
+                    arrival:8+estimate.first,departure:8+estimate.last};
+                  if(!result.cheapest||entry.total<result.cheapest.total-0.005)result.cheapest=entry;
+                  if(!result.costliest||entry.total>result.costliest.total+0.005)result.costliest=entry;
+                });
+              });
+            });
+          });
+        });
+      } finally {state=original;}
+      return result;
+    }
+    function applyExtreme(which){
+      if(!quickExtremes||!quickExtremes[which])return;
+      var pick=quickExtremes[which];
+      state=Object.assign({},state,pick.settings);
+      render();
+      notify((which==='cheapest'?'Cheapest':'Most expensive')+' plan applied · Scenario '+pick.settings.scenario);
+    }
+    function exportedPlanText(){
+      var settings={};
+      Object.keys(DEFAULTS).forEach(function(key){settings[key]=state[key];});
+      return JSON.stringify({kind:'week18-trip-planner',version:1,settings:settings},null,2);
+    }
+    function parseSavedPlan(raw){
+      if(typeof raw!=='string'||!raw.trim()||raw.length>40000)throw Error('Paste a saved trip plan (40 KB or less).');
+      var data;
+      try{data=JSON.parse(raw);}catch(e){throw Error('That is not valid plan JSON. Copy it again and paste the complete text.');}
+      if(!data||data.kind!=='week18-trip-planner'||data.version!==1||!data.settings||
+         typeof data.settings!=='object'||Array.isArray(data.settings)){
+        throw Error('This is not a compatible Week 18 saved plan.');
+      }
+      var imported={};
+      Object.keys(DEFAULTS).forEach(function(key){
+        if(!Object.prototype.hasOwnProperty.call(data.settings,key))throw Error('Saved plan is missing '+key+'.');
+        var val=data.settings[key];
+        if(key==='scenario'){
+          if(!['1','2','3'].includes(val))throw Error('Invalid scenario in saved plan.');
+        }else if(key==='buffaloStay'){
+          if(val!=='hotel'&&val!=='airbnb')throw Error('Invalid lodging choice in saved plan.');
+        }else if(typeof DEFAULTS[key]==='boolean'){
+          if(typeof val!=='boolean')throw Error('Invalid '+key+' setting in saved plan.');
+        }else{
+          if(typeof val!=='number'||!Number.isFinite(val)||val<0||val>100000)
+            throw Error('Invalid '+key+' number in saved plan.');
+          if(key==='people'&&(val<1||!Number.isInteger(val)))throw Error('Travelers must be a whole number of at least 1.');
+          if(key==='mpg'&&val<1)throw Error('MPG must be at least 1.');
+        }
+        imported[key]=val;
+      });
+      if((imported.buffaloStay==='airbnb'||imported.toronto)&&
+         (imported.scenario1LeaveSunday||imported.scenario3LeaveSunday))
+        throw Error('Sunday return needs Hotel + Buffalo only. Check the saved plan.');
+      return imported;
+    }
+    function syncPlanNumberInputs(){
+      [['hotel-rate','hotelRate'],['food-daily','foodDaily'],
+       ['bills-price','billsPrice'],['sabres-price','sabresPrice'],['leafs-price','leafsPrice'],
+       ['vehicle-mpg','mpg'],['gas-price','gasPrice'],
+       ['miles-home-buffalo','milesHomeBuffalo'],['miles-buffalo-toronto','milesBuffaloToronto'],
+       ['miles-toronto-home','milesTorontoHome'],['miles-local','milesLocal']]
+       .forEach(function(pair){byId(pair[0]).value=String(state[pair[1]]);});
+    }
+    function openPlanImport(){
+      var dialog=byId('import-plan-dialog');
+      byId('import-plan-error').textContent='';
+      byId('import-plan-input').value='';
+      byId('import-plan-file').value='';
+      if(typeof dialog.showModal==='function')dialog.showModal();
+      else dialog.setAttribute('open','');
+      byId('import-plan-input').focus();
+    }
+    function closePlanImport(){
+      var dialog=byId('import-plan-dialog');
+      if(typeof dialog.close==='function')dialog.close();
+      else dialog.removeAttribute('open');
+    }
+    function copyPlanFallback(value){
+      var area=elem('textarea');
+      area.value=value;area.style.cssText='position:fixed;left:-9999px;top:0;';
+      document.body.append(area);area.select();
+      var okay=false;
+      try{okay=document.execCommand('copy');}catch(e){}
+      area.remove();
+      if(okay)notify('Plan copied · use the load icon to restore it');
+      else{
+        openPlanImport();
+        var input=byId('import-plan-input');
+        input.value=value;input.select();
+        byId('import-plan-error').textContent='Clipboard copy is blocked. Copy the selected plan text manually to save it.';
+      }
+    }
+    function loadPlanText(){
+      var err=byId('import-plan-error');
+      err.textContent='';
+      try{
+        var next=parseSavedPlan(byId('import-plan-input').value);
+        state=next;
+        syncPlanNumberInputs();
+        render();
+        closePlanImport();
+        notify('Saved trip plan loaded');
+      }catch(e){err.textContent=e.message||'Unable to load that plan.';}
+    }
     function schedule(){
       var sc=state.scenario,t=state.toronto,airbnb=state.buffaloStay==='airbnb';
       var dates=dateWindow(sc),rows=[];
@@ -716,6 +846,15 @@ summary { cursor:pointer; font-size:13px; font-weight:800; }
     function render() {
       var c=calc();
       flashPerPersonChange(c.total/c.p);
+      quickExtremes=calculateExtremePlans();
+      ['cheapest','costliest'].forEach(function(kind){
+        var pick=quickExtremes[kind],button=byId('quick-'+kind);
+        byId('quick-'+kind+'-price').textContent=currency(pick.perPerson);
+        button.title=(kind==='cheapest'?'Cheapest':'Most expensive')+': '+currency(pick.perPerson)+
+          '/person · Scenario '+pick.settings.scenario+' · '+(pick.settings.buffaloStay==='hotel'?'Hotel':'Airbnb')+
+          ' · '+(pick.settings.toronto?'with Toronto':'Buffalo only')+
+          ' · Jan '+pick.arrival+'–'+pick.departure;
+      });
       byId('include-food').checked=c.foodIncluded;
       byId('food-included-status').textContent=c.foodIncluded?'On':'Off';
       document.querySelectorAll('.scenario-card').forEach(function(card) {
@@ -902,6 +1041,45 @@ summary { cursor:pointer; font-size:13px; font-weight:800; }
       var c=calc();
       return 'WEEK 18 ROAD TRIP — JANUARY 2027\nBuffalo '+(c.buffaloStayType==='airbnb'?'Airbnb':'hotel')+': '+exactCurrency(c.bookedHotelCash)+' ('+(c.saturdayArrival?'Jan 9':'Jan 8')+'–'+(c.sundayReturn?'Jan 10':'Jan 11')+')\nScenario '+state.scenario+'\nToronto Maple Leafs: '+(state.toronto?'Included':'Not included')+'\nFood & drinks in total: '+(c.foodIncluded?'Yes':'No')+'\nTravelers: '+c.p+'\nBuffalo stay units: '+c.rooms+' | Vehicles: '+c.vehicles+'\nArrival: '+(c.saturdayArrival?'Jan 9':'Jan 8')+'\nSunday return: '+(c.sundayReturn?'Yes':'No')+'\nTuesday return: '+(state.scenario==='2'&&c.last===4?'Yes':'No')+'\nLodging nights: '+c.nights+'\nMileage: '+Math.round(c.tripMiles)+' miles, '+c.mpg+' MPG, '+c.totalGallons.toFixed(1)+' total gallons, '+exactCurrency(c.gasPrice)+'/gal\nDriving route: '+c.tripRoute+'\nTravel home: Jan '+(8+c.last)+'\n\nEXPENSES (GROUP / PER PERSON)\n'+[[c.buffaloStayType==='airbnb'?'Buffalo Airbnb (incl. tax)':'Buffalo hotel (incl. tax)',c.bookedHotelCash],['Additional rooms/nights',c.estimatedHotelBase],['Extra hotel taxes',c.estimatedHotelTax],['Bills tickets',c.bills],['Sabres tickets',c.sabres],...(state.toronto?[['Leafs tickets',c.leafs]]:[]),['Fuel ('+Math.round(c.tripMiles)+' mi at '+c.mpg+' MPG, '+c.totalGallons.toFixed(1)+' gallons)',c.fuel],['Parking & tolls',c.parking],['Food and drinks'+(c.foodIncluded?'':' (excluded)'),c.includedFood]].map(function(x){return x[0]+': '+currency(x[1])+' / '+currency(x[1]/c.p);}).join('\n')+'\n\nFOOD & DRINKS / PERSON BY DAY\n'+c.foodDays.map(function(day){return day.label+' ('+day.games+' game(s)): '+currency(day.amount);}).join('\n')+'\n\nGROUP TOTAL: '+currency(c.total)+'\nPER PERSON: '+currency(c.total/c.p)+'\n\nPlanning estimates only. NFL Week 18 kickoff is not final.';
     }
+    byId('quick-cheapest').addEventListener('click',function(){applyExtreme('cheapest');});
+    byId('quick-costliest').addEventListener('click',function(){applyExtreme('costliest');});
+    byId('quick-copy-plan').addEventListener('click',function(){
+      var text=exportedPlanText();
+      if(navigator.clipboard&&navigator.clipboard.writeText){
+        navigator.clipboard.writeText(text)
+          .then(function(){notify('Plan copied · use the load icon to restore it');})
+          .catch(function(){copyPlanFallback(text);});
+      }else copyPlanFallback(text);
+    });
+    byId('quick-load-plan').addEventListener('click',openPlanImport);
+    byId('close-import-plan').addEventListener('click',closePlanImport);
+    byId('apply-saved-plan').addEventListener('click',loadPlanText);
+    byId('paste-plan-clipboard').addEventListener('click',function(){
+      var err=byId('import-plan-error');err.textContent='';
+      if(!navigator.clipboard||!navigator.clipboard.readText){
+        err.textContent='Clipboard access is unavailable. Paste with Ctrl+V (or long-press on mobile).';
+        byId('import-plan-input').focus();
+        return;
+      }
+      navigator.clipboard.readText().then(function(value){
+        byId('import-plan-input').value=value;
+        byId('import-plan-input').focus();
+      }).catch(function(){
+        err.textContent='Clipboard permission denied. Paste into the text box manually.';
+        byId('import-plan-input').focus();
+      });
+    });
+    byId('import-plan-file').addEventListener('change',function(event){
+      var file=event.target.files&&event.target.files[0];
+      if(!file)return;
+      var err=byId('import-plan-error');
+      if(file.size>40000){err.textContent='File is too large for a trip plan (max 40 KB).';return;}
+      if(typeof FileReader!=='function'){err.textContent='File reading is unavailable in this browser.';return;}
+      var reader=new FileReader();
+      reader.onload=function(){byId('import-plan-input').value=String(reader.result||'');err.textContent='';};
+      reader.onerror=function(){err.textContent='Cannot read that file. Try pasting the saved text instead.';};
+      reader.readAsText(file);
+    });
     byId('copy-summary').addEventListener('click',function(){
       var text=summary();
       if(navigator.clipboard && navigator.clipboard.writeText){navigator.clipboard.writeText(text).then(function(){notify('Cost estimate copied!');}).catch(function(){fallbackCopy(text);});}
