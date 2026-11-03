@@ -509,9 +509,8 @@ summary { cursor:pointer; font-size:13px; font-weight:800; }
     }
     var quickExtremes=null;
     function calculateExtremePlans(){
-      // Optimize every real itinerary choice, including the food-inclusion switch.
-      // Preserve actual traveler count and price/mileage/MPG assumptions; changing
-      // those to arbitrary extremes would create misleading cost estimates.
+      // Optimize itinerary options using the user's current food inclusion setting.
+      // The food toggle, group size, ticket prices, mileage, and MPG are independent.
       var original=state, result={cheapest:null,costliest:null};
       try {
         ['1','2','3'].forEach(function(sc){
@@ -525,22 +524,20 @@ summary { cursor:pointer; font-size:13px; font-weight:800; }
                 :[false,true];
               arrivalOptions.forEach(function(arriveEarly){
                 departOptions.forEach(function(departEarly){
-                  [false,true].forEach(function(foodIncluded){
-                    var settings={
-                      scenario:sc,toronto:toronto,buffaloStay:stay,includeFood:foodIncluded,
-                      scenario1ArriveSaturday:sc==='1'&&arriveEarly,
-                      scenario1LeaveSunday:sc==='1'&&departEarly,
-                      scenario2ArriveFriday:sc==='2'&&arriveEarly,
-                      scenario2LeaveTuesday:sc==='2'&&departEarly,
-                      scenario3LeaveSunday:sc==='3'&&departEarly
-                    };
-                    state=Object.assign({},original,settings);
-                    var estimate=calc();
-                    var entry={settings:settings,total:estimate.total,perPerson:estimate.total/estimate.p,
-                      arrival:8+estimate.first,departure:8+estimate.last};
-                    if(!result.cheapest||entry.total<result.cheapest.total-0.005)result.cheapest=entry;
-                    if(!result.costliest||entry.total>result.costliest.total+0.005)result.costliest=entry;
-                  });
+                  var settings={
+                    scenario:sc,toronto:toronto,buffaloStay:stay,
+                    scenario1ArriveSaturday:sc==='1'&&arriveEarly,
+                    scenario1LeaveSunday:sc==='1'&&departEarly,
+                    scenario2ArriveFriday:sc==='2'&&arriveEarly,
+                    scenario2LeaveTuesday:sc==='2'&&departEarly,
+                    scenario3LeaveSunday:sc==='3'&&departEarly
+                  };
+                  state=Object.assign({},original,settings);
+                  var estimate=calc();
+                  var entry={settings:settings,total:estimate.total,perPerson:estimate.total/estimate.p,
+                    arrival:8+estimate.first,departure:8+estimate.last};
+                  if(!result.cheapest||entry.total<result.cheapest.total-0.005)result.cheapest=entry;
+                  if(!result.costliest||entry.total>result.costliest.total+0.005)result.costliest=entry;
                 });
               });
             });
@@ -555,8 +552,7 @@ summary { cursor:pointer; font-size:13px; font-weight:800; }
       state=Object.assign({},state,pick.settings);
       render();
       notify((which==='cheapest'?'Cheapest':'Most expensive')+
-        ' full plan applied · food '+(pick.settings.includeFood?'included':'excluded')+
-        ' · '+currency(pick.perPerson)+'/person');
+        ' trip selected · food & drinks unchanged · '+currency(pick.perPerson)+'/person');
     }
     function exportedPlanText(){
       var settings={};
@@ -755,7 +751,7 @@ summary { cursor:pointer; font-size:13px; font-weight:800; }
           '/person · Scenario '+pick.settings.scenario+' · '+(pick.settings.buffaloStay==='hotel'?'Hotel':'Airbnb')+
           ' · '+(pick.settings.toronto?'with Toronto':'Buffalo only')+
           ' · Jan '+pick.arrival+'–'+pick.departure+
-          ' · food '+(pick.settings.includeFood?'included':'excluded')+
+          ' · food & drinks '+(state.includeFood?'included':'excluded')+' (toggle unchanged)'+
           ' · traveler count and estimated prices preserved';
         button.setAttribute('aria-label',button.title);
       });
