@@ -20,6 +20,33 @@ header { background:#fff; border-bottom:1px solid #000; }
 .brand { display:flex; align-items:center; gap:10px; text-transform:uppercase; font-size:12px; font-weight:800; letter-spacing:.08em; }
 .brandmark { display:grid; place-items:center; width:34px; height:34px; background:#000; color:#fff; font-size:12px; font-weight:800; }
 .top-label { font-size:11px; font-weight:600; text-align:right; }
+.topbar-right { display:flex; align-items:center; gap:14px; min-width:0; }
+.quick-tools { display:flex; align-items:center; gap:5px; }
+.quick-tool { display:flex; align-items:center; justify-content:center; gap:5px; height:34px; min-width:34px; padding:0 7px; border:1px solid #aaa; border-radius:0; color:#000; background:#fff; }
+.quick-tool:hover { border-color:#000; background:#000; color:#fff; }
+.quick-tool:focus-visible { outline:2px solid #000; outline-offset:2px; }
+.quick-tool svg { width:16px; height:16px; flex:none; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
+.quick-tool .quick-price { font-size:10px; font-weight:800; font-variant-numeric:tabular-nums; white-space:nowrap; }
+.quick-tools-divider { width:1px; height:23px; background:#aaa; margin:0 2px; }
+.import-plan-dialog { width:min(460px,calc(100% - 28px)); max-height:calc(100vh - 32px); overflow:auto; border:2px solid #000; padding:20px; border-radius:0; background:#fff; color:#000; }
+.import-plan-dialog::backdrop { background:rgba(0,0,0,.65); }
+.import-plan-dialog h2 { font-size:19px; margin:0 0 5px; }
+.import-plan-dialog p { margin:0 0 12px; font-size:12px; }
+.import-plan-dialog textarea { display:block; width:100%; min-height:126px; padding:10px; border:1px solid #000; resize:vertical; font-size:12px; font-family:ui-monospace,monospace; }
+.import-plan-dialog .import-actions { display:flex; flex-wrap:wrap; gap:8px; margin-top:12px; }
+.import-plan-dialog .import-actions button { flex:1 1 auto; border:1px solid #000; padding:9px 12px; color:#000; background:#fff; font-size:12px; font-weight:700; }
+.import-plan-dialog .import-actions button.primary { background:#000; color:#fff; }
+.import-plan-dialog .import-actions button:hover { opacity:.8; }
+.import-plan-dialog .import-file { display:block; margin-top:10px; font-size:11px; }
+.import-plan-dialog .import-file input { display:block; max-width:100%; margin-top:4px; font-size:11px; }
+.import-error { min-height:17px; margin-top:8px; color:#a50000; font-size:12px; font-weight:700; }
+@media(max-width:640px) {
+  .topbar { flex-wrap:wrap; gap:9px; }
+  .topbar-right { flex-wrap:wrap; justify-content:flex-end; margin-left:auto; gap:7px; }
+  .top-label { display:none; }
+  .quick-tool { height:32px; min-width:32px; padding:0 6px; }
+  .quick-price { font-size:10px; }
+}
 .hero { background:#fff; color:#000; padding:33px 0 25px; border-bottom:1px solid #000; display:block; min-height:0; border-radius:0; box-shadow:none; }
 .hero:after { display:none; }
 .kicker { font-size:11px; font-weight:800; letter-spacing:.08em; color:#000; }
@@ -215,7 +242,16 @@ summary { cursor:pointer; font-size:13px; font-weight:800; }
   <header>
     <div class="shell topbar">
       <div class="brand"><span class="brandmark" aria-hidden="true">W18</span><span>Week 18 Road Trip</span></div>
-      <div class="top-label">JANUARY 2027 <span aria-hidden="true">·</span> BUFFALO / TORONTO</div>
+      <div class="topbar-right">
+        <div class="top-label">JANUARY 2027 <span aria-hidden="true">·</span> BUFFALO / TORONTO</div>
+        <nav class="quick-tools" aria-label="Plan shortcuts">
+          <button type="button" class="quick-tool" id="quick-cheapest" aria-label="Apply cheapest trip plan" title="Apply cheapest trip plan"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 6h14M7 11l5 6 5-6M12 9v8"/></svg><span class="quick-price" id="quick-cheapest-price">—</span></button>
+          <button type="button" class="quick-tool" id="quick-costliest" aria-label="Apply most expensive trip plan" title="Apply most expensive trip plan"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 18h14M7 13l5-6 5 6M12 7v8"/></svg><span class="quick-price" id="quick-costliest-price">—</span></button>
+          <span class="quick-tools-divider" aria-hidden="true"></span>
+          <button type="button" class="quick-tool" id="quick-copy-plan" aria-label="Copy current plan to clipboard" title="Copy current plan to clipboard"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="1"/><path d="M16 8V4H4v12h4"/></svg></button>
+          <button type="button" class="quick-tool" id="quick-load-plan" aria-label="Load a saved plan from clipboard or file" title="Load a saved plan"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m-5-5 5 5 5-5M4 17v3h16v-3"/></svg></button>
+        </nav>
+      </div>
     </div>
   </header>
   <div class="shell">
@@ -355,6 +391,19 @@ summary { cursor:pointer; font-size:13px; font-weight:800; }
       </div>
     </div>
   </div>
+  <dialog id="import-plan-dialog" class="import-plan-dialog" aria-labelledby="import-plan-title">
+    <h2 id="import-plan-title">Load saved trip plan</h2>
+    <p>Paste the plan copied with the top-right copy icon, or open a saved JSON file. Loading replaces the options currently shown.</p>
+    <label for="import-plan-input" class="form-label">Saved plan JSON</label>
+    <textarea id="import-plan-input" spellcheck="false" placeholder="Paste your saved trip plan here"></textarea>
+    <div class="import-actions">
+      <button type="button" id="paste-plan-clipboard">Paste clipboard</button>
+      <button type="button" id="apply-saved-plan" class="primary">Load plan</button>
+      <button type="button" id="close-import-plan">Cancel</button>
+    </div>
+    <label class="import-file" for="import-plan-file">Or choose a saved .json file<input id="import-plan-file" type="file" accept=".json,application/json,text/plain"></label>
+    <div id="import-plan-error" class="import-error" role="alert" aria-live="polite"></div>
+  </dialog>
   <div id="toast" role="status" aria-live="polite"></div>
   <script>
   (function () {
