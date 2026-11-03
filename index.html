@@ -335,7 +335,7 @@ summary { cursor:pointer; font-size:13px; font-weight:800; }
     </aside>
   </main>
   <section class="shell"><div class="comparison"><p class="section-id">SIDE BY SIDE</p><h2>Compare all three scenarios</h2><p class="helper">Using your current group size, prices, and Toronto choice. Select a scenario above to update the trip.</p><div class="comparison-scroll"><table class="compare-table"><thead><tr><th>Scenario</th><th>Nights</th><th>Group total</th><th>Per person</th></tr></thead><tbody id="comparison-rows"></tbody></table></div></div></section>
-  <footer class="shell footer"><p><strong>Buffalo accommodation:</strong> Airbnb is fixed for Friday, January 8 through Monday, January 11 ($772.27 total, tax included). The hotel option is $1,090.57 for three nights and is prorated when arriving Saturday. Additional stays after Monday are estimated. <strong>Planning estimates only.</strong> Games are assumed to be home games on the dates discussed. The NFL has not finalized Week 18 kickoff times. Scenario 3 requires a Saturday 1 PM Bills kickoff and adequate travel time between Orchard Park and KeyBank Center. Hotels are modeled at up to 4 guests per room; vehicle costs assume up to 5 travelers per vehicle. Fuel, parking, tolls, hotel taxes (estimated 16%), and food are approximate and may differ in practice.</p><span>Week 18 road trip · 2027</span></footer>
+  <footer class="shell footer"><p><strong>Buffalo accommodation:</strong> Airbnb is fixed for Friday, January 8 through Monday, January 11 ($772.27 total, tax included). The hotel option is $1,090.57 for three nights and is prorated for shorter stays. Additional stays after Monday are estimated. <strong>Planning estimates only.</strong> Games are assumed to be home games on the dates discussed. The NFL has not finalized Week 18 kickoff times. Scenario 3 requires a Saturday 1 PM Bills kickoff and adequate travel time between Orchard Park and KeyBank Center. Hotels are modeled at up to 4 guests per room; vehicle costs assume up to 5 travelers per vehicle. Fuel, parking, tolls, hotel taxes (estimated 16%), and food are approximate and may differ in practice.</p><span>Week 18 road trip · 2027</span></footer>
   <div class="sticky-total" aria-label="Live trip cost">
     <div class="shell sticky-inner">
       <div class="mini-week" aria-label="Trip week at a glance">
@@ -598,7 +598,7 @@ summary { cursor:pointer; font-size:13px; font-weight:800; }
         ?(c.buffaloStayType==='airbnb'
             ?'Leafs Monday, January 11. Check out of the Buffalo Airbnb that morning.'
             :state.scenario==='2'
-              ?'Arrive Saturday, January 9. Leafs Monday; return to Buffalo for Sabres Tuesday.'
+              ?'Arrive '+(c.saturdayArrival?'Saturday, Jan 9':'Friday, Jan 8')+'. Leafs Monday; return to Buffalo for Sabres Tuesday.'
               :state.scenario==='1'
                 ?'Arrive Saturday, January 9. Leafs in Toronto Monday.'
                 :'Arrive Friday, January 8. Leafs in Toronto Monday.')
@@ -607,7 +607,7 @@ summary { cursor:pointer; font-size:13px; font-weight:800; }
               ?'Buffalo only · head home after Sunday’s Bills game if kickoff permits.'
               :'Buffalo only · leave Sunday after Saturday’s doubleheader.')
           :state.scenario==='2'
-            ?'Arrive Saturday with the hotel, Friday with the Airbnb. Sabres Tuesday; no Toronto game.'
+            ?'Arrive '+(c.saturdayArrival?'Saturday, Jan 9':'Friday, Jan 8')+' · Sabres Tuesday · '+(c.last===4?'leave Tuesday after the game.':'leave Wednesday.')
             :'Bills and Sabres only. No Leafs ticket or Toronto travel cost.';
       byId('scenario-one-arrival').textContent=scenarioOnePlan.saturdayArrival
         ?'Arrive Saturday, January 9':'Arrive Friday, January 8';
