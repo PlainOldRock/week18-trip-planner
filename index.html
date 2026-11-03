@@ -10,7 +10,7 @@
 :root { color-scheme:light; --black:#000; --white:#fff; }
 * { box-sizing:border-box; }
 html { scroll-behavior:smooth; }
-body { margin:0; padding-bottom:calc(148px + env(safe-area-inset-bottom)); font:15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif; color:#000; background:#fff; }
+body { margin:0; padding-bottom:calc(240px + env(safe-area-inset-bottom)); font:15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif; color:#000; background:#fff; }
 button,input { font:inherit; }
 button { cursor:pointer; }
 button:focus-visible,input:focus-visible,summary:focus-visible { outline:3px solid #000; outline-offset:3px; }
@@ -123,10 +123,33 @@ summary { cursor:pointer; font-size:13px; font-weight:800; }
 .footer { display:flex; gap:24px; justify-content:space-between; padding-bottom:22px; font-size:11px; color:#000; }
 .footer p { max-width:780px; margin:0; }
 .sr-only { position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; }
-#toast { position:fixed; z-index:30; bottom:calc(148px + env(safe-area-inset-bottom)); left:50%; transform:translate(-50%,16px); opacity:0; pointer-events:none; background:#000; color:#fff; border:1px solid #fff; font-size:12px; font-weight:700; padding:10px 15px; transition:opacity .15s,transform .15s; }
+#toast { position:fixed; z-index:30; bottom:calc(235px + env(safe-area-inset-bottom)); left:50%; transform:translate(-50%,16px); opacity:0; pointer-events:none; background:#000; color:#fff; border:1px solid #fff; font-size:12px; font-weight:700; padding:10px 15px; transition:opacity .15s,transform .15s; }
 #toast.show { opacity:1; transform:translate(-50%,0); }
 .sticky-total { position:fixed; bottom:0; left:0; right:0; z-index:20; background:#000; color:#fff; border-top:2px solid #000; padding-bottom:env(safe-area-inset-bottom); }
 .sticky-inner { display:block; }
+.mini-week { padding:7px 0 8px; border-bottom:1px solid #777; }
+.mini-week-header { display:flex; justify-content:space-between; gap:10px; align-items:center; margin-bottom:6px; color:#fff; font-size:10px; font-weight:750; letter-spacing:.05em; text-transform:uppercase; }
+.mini-mileage { font-variant-numeric:tabular-nums; text-align:right; }
+.mini-week-grid { display:grid; grid-template-columns:repeat(7,minmax(0,1fr)); gap:5px; }
+.mini-day { min-width:0; height:51px; display:flex; flex-direction:column; justify-content:space-between; align-items:center; padding:3px 1px; background:#151515; color:#fff; border:1px solid #777; }
+.mini-day.active { background:#fff; color:#000; border-color:#fff; }
+.mini-day.inactive { opacity:.45; }
+.mini-day-name { font-size:9px; font-weight:750; white-space:nowrap; }
+.mini-day-icons { display:flex; gap:2px; align-items:center; justify-content:center; height:23px; min-width:0; }
+.mini-car { width:20px; height:20px; flex:0 0 20px; display:block; fill:none; stroke:currentColor; stroke-width:1.65; stroke-linecap:round; stroke-linejoin:round; }
+.mini-logo-wrap { display:inline-flex; align-items:center; justify-content:center; position:relative; width:19px; height:19px; flex:0 0 19px; }
+.mini-team-logo { width:19px; height:19px; object-fit:contain; filter:grayscale(1) contrast(2.6); mix-blend-mode:multiply; }
+.mini-logo-fallback { font-size:10px; font-weight:950; color:#000; line-height:1; }
+.mini-free-day { display:block; width:12px; height:12px; background:#000; }
+.mileage-box { border:1px solid #000; padding:12px; display:grid; gap:4px; }
+.mileage-box strong { color:#000; font-size:22px; line-height:1.1; font-variant-numeric:tabular-nums; }
+.mileage-caption { font-size:11px; }
+.number-input-wrap { display:flex; justify-content:flex-end; align-items:center; border:1px solid #000; padding:0 9px; min-width:106px; }
+.number-input-wrap:focus-within { outline:2px solid #000; outline-offset:2px; }
+.number-input-wrap input { width:65px; padding:10px 4px; outline:0; border:0; color:#000; background:#fff; font-weight:750; }
+.number-input-wrap span { font-size:11px; font-weight:850; }
+.mileage-fields { display:grid; gap:12px; padding-top:12px; }
+.mileage-fields .number-input-wrap { min-width:95px; }
 .sticky-option { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:10px 0; border-bottom:1px solid #fff; cursor:pointer; color:#fff; font-size:13px; font-weight:700; }
 .sticky-switch-controls { display:flex; align-items:center; gap:10px; }
 #food-included-status { min-width:25px; text-align:right; font-size:12px; }
@@ -147,7 +170,7 @@ summary { cursor:pointer; font-size:13px; font-weight:800; }
 .sticky-secondary strong { font-size:19px; font-weight:800; line-height:1.3; font-variant-numeric:tabular-nums; }
 @media(max-width:850px) { .main { grid-template-columns:1fr; } }
 @media(max-width:530px) {
-  body { padding-bottom:calc(137px + env(safe-area-inset-bottom)); }
+  body { padding-bottom:calc(224px + env(safe-area-inset-bottom)); }
   .shell { padding-left:16px; padding-right:16px; }
   .topbar { padding-top:12px; padding-bottom:12px; }
   .top-label { font-size:10px; }
@@ -161,13 +184,21 @@ summary { cursor:pointer; font-size:13px; font-weight:800; }
   .day-row { grid-template-columns:73px 1fr; gap:9px; }
   .cost-table td { font-size:11px; }
   .sticky-option { padding:10px 0; font-size:12px; }
+  .mini-week { padding:5px 0 6px; }
+  .mini-week-header { font-size:9px; margin-bottom:4px; }
+  .mini-week-grid { gap:3px; }
+  .mini-day { height:46px; padding:2px 0; }
+  .mini-day-name { font-size:8px; }
+  .mini-day-icons { height:22px; gap:1px; }
+  .mini-team-logo,.mini-logo-wrap { width:18px; height:18px; flex-basis:18px; }
+  .mini-car { width:18px; height:18px; flex-basis:18px; }
   .sticky-costs { padding:8px 0 10px; }
   .sticky-main strong { font-size:28px; }
   .sticky-person-line { column-gap:6px; }
   .price-delta { font-size:11px; }
   .sticky-secondary strong { font-size:17px; }
   .sticky-caption,.sticky-secondary span { font-size:10px; }
-  #toast { bottom:calc(136px + env(safe-area-inset-bottom)); }
+  #toast { bottom:calc(220px + env(safe-area-inset-bottom)); }
   .footer { display:block; }
 }
 @media(prefers-reduced-motion:reduce) { *,*:before,*:after { scroll-behavior:auto!important; transition:none!important; } }
@@ -235,6 +266,24 @@ summary { cursor:pointer; font-size:13px; font-weight:800; }
           <div class="divider"></div>
           <div class="form-row"><div><label class="form-label" for="hotel-rate">Additional hotel room / night</label><div class="form-sub">Estimate for extra rooms or nights · USD before tax</div></div><div class="money-input-wrap"><span aria-hidden="true">$</span><input type="number" min="0" max="100000" step="10" id="hotel-rate" value="270" inputmode="decimal"></div></div>
           <div class="divider"></div>
+          <div class="mileage-box" aria-label="Estimated driving mileage and gallons">
+            <span class="form-label">Estimated road-trip mileage</span>
+            <strong id="trip-mileage">~1,010 miles</strong>
+            <span class="mileage-caption" id="trip-route">Arlington, VA → Buffalo → Toronto → Arlington</span>
+            <span class="mileage-caption" id="trip-gallons">~50.5 gallons per vehicle</span>
+          </div>
+          <div class="form-row"><div><label class="form-label" for="vehicle-mpg">Vehicle fuel economy</label><div class="form-sub">Miles per gallon (MPG) · per vehicle</div></div><div class="number-input-wrap"><input id="vehicle-mpg" type="number" min="1" max="100" step="1" value="20" inputmode="decimal"><span>MPG</span></div></div>
+          <div class="form-row"><div><label class="form-label" for="gas-price">Estimated gasoline price</label><div class="form-sub">USD per gallon · editable estimate</div></div><div class="money-input-wrap"><span aria-hidden="true">$</span><input id="gas-price" type="number" min="0" max="100" step="0.05" value="3.75" inputmode="decimal"></div></div>
+          <details><summary>Edit driving-distance assumptions</summary>
+            <p class="subtle-note">Starting point assumed Arlington, VA. Adjust the route distances if driving from somewhere else. Include local driving for games and errands.</p>
+            <div class="mileage-fields">
+              <label class="ticket-field"><span>Home → Buffalo (one way)</span><span class="number-input-wrap"><input id="miles-home-buffalo" type="number" min="0" step="1" value="382"><span>mi</span></span></label>
+              <label class="ticket-field"><span>Buffalo ↔ Toronto (one way)</span><span class="number-input-wrap"><input id="miles-buffalo-toronto" type="number" min="0" step="1" value="98"><span>mi</span></span></label>
+              <label class="ticket-field"><span>Toronto → Home (one way)</span><span class="number-input-wrap"><input id="miles-toronto-home" type="number" min="0" step="1" value="480"><span>mi</span></span></label>
+              <label class="ticket-field"><span>Local game-day / errand miles</span><span class="number-input-wrap"><input id="miles-local" type="number" min="0" step="1" value="50"><span>mi</span></span></label>
+            </div>
+          </details>
+          <div class="divider"></div>
           <div class="form-row"><div><label class="form-label" for="food-daily">Food &amp; drinks per day</label><div class="form-sub">Base daily spending per person · USD</div></div><div class="money-input-wrap"><span aria-hidden="true">$</span><input type="number" min="0" max="100000" step="5" id="food-daily" value="100" inputmode="decimal"></div></div>
           <div class="preset-row" id="food-presets"><button type="button" class="preset" data-food="50">$50/day</button><button type="button" class="preset" data-food="75">$75/day</button><button type="button" class="preset active" data-food="100">$100/day</button><button type="button" class="preset" data-food="150">$150/day</button></div>
           <p class="subtle-note">Each game adds $50 per person on that day. Two games on Saturday add $100, making the default doubleheader budget $200.</p>
@@ -267,6 +316,10 @@ summary { cursor:pointer; font-size:13px; font-weight:800; }
   <footer class="shell footer"><p><strong>Buffalo accommodation:</strong> Airbnb is fixed for Friday, January 8 through Monday, January 11 ($772.27 total, tax included). The hotel option is $1,090.57 for three nights and is prorated when arriving Saturday. Additional stays after Monday are estimated. <strong>Planning estimates only.</strong> Games are assumed to be home games on the dates discussed. The NFL has not finalized Week 18 kickoff times. Scenario 3 requires a Saturday 1 PM Bills kickoff and adequate travel time between Orchard Park and KeyBank Center. Hotels are modeled at up to 4 guests per room; vehicle costs assume up to 5 travelers per vehicle. Fuel, parking, tolls, hotel taxes (estimated 16%), and food are approximate and may differ in practice.</p><span>Week 18 road trip · 2027</span></footer>
   <div class="sticky-total" aria-label="Live trip cost">
     <div class="shell sticky-inner">
+      <div class="mini-week" aria-label="Trip week at a glance">
+        <div class="mini-week-header"><span>Jan 8–14, 2027 · Trip week</span><span class="mini-mileage" id="sticky-mileage">~1,010 mi · 20 MPG</span></div>
+        <div class="mini-week-grid" id="trip-week-calendar" aria-label="Selected travel and game dates"></div>
+      </div>
       <label class="sticky-option" for="include-food">
         <span>Include food &amp; drinks</span>
         <span class="sticky-switch-controls">
@@ -284,7 +337,7 @@ summary { cursor:pointer; font-size:13px; font-weight:800; }
   <script>
   (function () {
     'use strict';
-    var DEFAULTS = { scenario:'1', toronto:true, buffaloStay:'hotel', includeFood:false, people:4, hotelRate:270, foodDaily:100, billsPrice:225, sabresPrice:75, leafsPrice:145 };
+    var DEFAULTS = { scenario:'1', toronto:true, buffaloStay:'hotel', includeFood:false, people:4, hotelRate:270, mpg:20, gasPrice:3.75, milesHomeBuffalo:382, milesBuffaloToronto:98, milesTorontoHome:480, milesLocal:50, foodDaily:100, billsPrice:225, sabresPrice:75, leafsPrice:145 };
     var state = Object.assign({}, DEFAULTS);
     try {
       var saved = JSON.parse(localStorage.getItem('week18-budget-v4') || 'null');
@@ -353,14 +406,28 @@ summary { cursor:pointer; font-size:13px; font-weight:800; }
       var bills = numeric(state.billsPrice,225)*p;
       var sabres = numeric(state.sabresPrice,75)*p;
       var leafs = state.toronto?numeric(state.leafsPrice,145)*p:0;
-      var fuel = (state.toronto ? (sc==='2'?300:280):240)*vehicles;
+      var mpg=Math.max(1,numeric(state.mpg,20)), gasPrice=numeric(state.gasPrice,3.75);
+      var homeBuffalo=numeric(state.milesHomeBuffalo,382);
+      var buffaloToronto=numeric(state.milesBuffaloToronto,98);
+      var torontoHome=numeric(state.milesTorontoHome,480);
+      var localMiles=numeric(state.milesLocal,50);
+      // Scenario 2 returns from Toronto to Buffalo for Tuesday's Sabres game.
+      var tripMiles=state.toronto
+        ?(sc==='2'?2*homeBuffalo+2*buffaloToronto+localMiles:homeBuffalo+buffaloToronto+torontoHome+localMiles)
+        :2*homeBuffalo+localMiles;
+      var gallonsPerVehicle=tripMiles/mpg;
+      var totalGallons=gallonsPerVehicle*vehicles;
+      var fuel=Math.round(totalGallons*gasPrice*100)/100;
+      var tripRoute=state.toronto
+        ?(sc==='2'?'Arlington, VA → Buffalo → Toronto → Buffalo → Arlington, VA':'Arlington, VA → Buffalo → Toronto → Arlington, VA')
+        :'Arlington, VA → Buffalo → Arlington, VA';
       var parking = (state.toronto ? (sc==='2'?220:200):150)*vehicles;
       var foodDays = foodDayPlan(sc,state.toronto);
       var foodPerPerson = foodDays.reduce(function(sum,day){return sum+day.amount;},0);
       var food = foodPerPerson*p;
       var foodIncluded=state.includeFood===true;
       var includedFood=foodIncluded?food:0;
-      return {p:p,rooms:rooms,vehicles:vehicles,nights:nights,days:days,hotel:hotel,tax:tax,buffaloStayType:buffaloStayType,bookedHotelCash:bookedHotelCash,buffaloNights:buffaloNights,saturdayArrival:saturdayArrival,extraRoomNights:extraRoomNights,estimatedHotelBase:estimatedHotelBase,estimatedHotelTax:estimatedHotelTax,bills:bills,sabres:sabres,leafs:leafs,fuel:fuel,parking:parking,food:food,includedFood:includedFood,foodIncluded:foodIncluded,foodDays:foodDays,foodPerPerson:foodPerPerson,total:hotel+tax+bills+sabres+leafs+fuel+parking+includedFood};
+      return {p:p,rooms:rooms,vehicles:vehicles,nights:nights,days:days,hotel:hotel,tax:tax,buffaloStayType:buffaloStayType,bookedHotelCash:bookedHotelCash,buffaloNights:buffaloNights,saturdayArrival:saturdayArrival,extraRoomNights:extraRoomNights,estimatedHotelBase:estimatedHotelBase,estimatedHotelTax:estimatedHotelTax,bills:bills,sabres:sabres,leafs:leafs,fuel:fuel,tripMiles:tripMiles,tripRoute:tripRoute,mpg:mpg,gasPrice:gasPrice,gallonsPerVehicle:gallonsPerVehicle,totalGallons:totalGallons,parking:parking,food:food,includedFood:includedFood,foodIncluded:foodIncluded,foodDays:foodDays,foodPerPerson:foodPerPerson,total:hotel+tax+bills+sabres+leafs+fuel+parking+includedFood};
     }
     function schedule() {
       var sc=state.scenario, t=state.toronto;
@@ -391,6 +458,70 @@ summary { cursor:pointer; font-size:13px; font-weight:800; }
       return rows;
     }
     function elem(tag, className, value) { var el=document.createElement(tag); if(className) el.className=className; if (value!==undefined) el.textContent=value; return el; }
+    var TEAM_LOGOS={
+      bills:'https://a.espncdn.com/i/teamlogos/nfl/500/buf.png',
+      sabres:'https://a.espncdn.com/i/teamlogos/nhl/500/buf.png',
+      leafs:'https://a.espncdn.com/i/teamlogos/nhl/500/tor.png'
+    };
+    function miniCar(){
+      var svg=document.createElementNS('http://www.w3.org/2000/svg','svg');
+      svg.setAttribute('class','mini-car');
+      svg.setAttribute('viewBox','0 0 24 24');
+      svg.setAttribute('aria-hidden','true');
+      var path=document.createElementNS('http://www.w3.org/2000/svg','path');
+      path.setAttribute('d','M5 17H4a1 1 0 0 1-1-1v-4a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v4a1 1 0 0 1-1 1h-1M5 17h14M7 10l2-5h6l2 5M7 17v2M17 17v2M7 13h.01M17 13h.01');
+      svg.append(path);
+      return svg;
+    }
+    function miniLogo(team){
+      var wrap=elem('span','mini-logo-wrap');
+      var img=elem('img','mini-team-logo');
+      img.alt=''; // The day container has the full accessible description.
+      img.src=TEAM_LOGOS[team];
+      img.loading='lazy';
+      var fallback=elem('span','mini-logo-fallback',team==='bills'?'B':team==='sabres'?'S':'T');
+      fallback.hidden=true;
+      img.onerror=function(){img.hidden=true;fallback.hidden=false;};
+      wrap.append(img,fallback);
+      return wrap;
+    }
+    function weekEvents(sc,withToronto,saturdayArrival,airbnb){
+      // Each array is a day from Fri Jan 8 to Thu Jan 14 (2027).
+      var days=[[],[],[],[],[],[],[]];
+      var last=sc==='2'?5:withToronto?4:3;
+      var first=saturdayArrival?1:0;
+      days[first].push('car'); // Drive to Buffalo.
+      if(sc==='1'){days[1].push('sabres');days[2].push('bills');}
+      else if(sc==='2'){days[1].push('bills');days[4].push('sabres');}
+      else{days[1].push('bills','sabres');}
+      if(withToronto){
+        days[3].push('car','leafs'); // Buffalo → Toronto on Monday.
+        if(sc==='2')days[4].unshift('car'); // Toronto → Buffalo on Tuesday.
+      } else if(sc==='2'&&airbnb){
+        days[3].push('car'); // Move out of the fixed Airbnb Monday.
+      }
+      days[last].push('car'); // Drive home.
+      return {days:days,first:first,last:last};
+    }
+    function renderTripWeek(c){
+      var days=['FRI 8','SAT 9','SUN 10','MON 11','TUE 12','WED 13','THU 14'];
+      var eventNames={car:'Driving',bills:'Buffalo Bills game',sabres:'Buffalo Sabres game',leafs:'Toronto Maple Leafs game'};
+      var plan=weekEvents(state.scenario,state.toronto,c.saturdayArrival,c.buffaloStayType==='airbnb');
+      var calendar=byId('trip-week-calendar'); calendar.replaceChildren();
+      days.forEach(function(day,index){
+        var active=index>=plan.first&&index<=plan.last;
+        var item=elem('div','mini-day '+(active?'active':'inactive'));
+        var icons=elem('div','mini-day-icons');
+        if(active){
+          if(!plan.days[index].length)icons.append(elem('span','mini-free-day'));
+          else plan.days[index].forEach(function(event){icons.append(event==='car'?miniCar():miniLogo(event));});
+        }
+        item.setAttribute('aria-label',day+': '+(active?(plan.days[index].length?plan.days[index].map(function(x){return eventNames[x];}).join(' and '):'Free day'):'Not on trip'));
+        item.append(elem('span','mini-day-name',day),icons);
+        calendar.append(item);
+      });
+      byId('sticky-mileage').textContent='~'+Math.round(c.tripMiles).toLocaleString('en-US')+' mi · '+c.mpg.toLocaleString('en-US')+' MPG';
+    }
     function render() {
       var c=calc();
       flashPerPersonChange(c.total/c.p);
@@ -442,6 +573,10 @@ summary { cursor:pointer; font-size:13px; font-weight:800; }
       byId('hero-group-cost').textContent=currency(c.total);
       byId('sticky-person-cost').textContent=currency(c.total/c.p);
       byId('sticky-group-cost').textContent=currency(c.total);
+      byId('trip-mileage').textContent='~'+Math.round(c.tripMiles).toLocaleString('en-US')+' miles';
+      byId('trip-route').textContent=c.tripRoute;
+      byId('trip-gallons').textContent=c.gallonsPerVehicle.toFixed(1)+' gal per vehicle · '+c.totalGallons.toFixed(1)+' gal across '+c.vehicles+' '+(c.vehicles===1?'vehicle':'vehicles');
+      renderTripWeek(c);
       var foodRows=byId('food-day-rows'); foodRows.replaceChildren();
       c.foodDays.forEach(function(day) {
         var row=elem('div','food-day-row');
@@ -478,7 +613,7 @@ summary { cursor:pointer; font-size:13px; font-weight:800; }
       }
       breakdown.push(['Bills tickets',c.bills],['Sabres tickets',c.sabres]);
       if(state.toronto)breakdown.push(['Leafs tickets',c.leafs]);
-      breakdown.push(['Fuel',c.fuel],['Parking & tolls',c.parking],['Food & drinks'+(c.foodIncluded?'':' (excluded)'),c.includedFood]);
+      breakdown.push(['Fuel ('+Math.round(c.tripMiles).toLocaleString('en-US')+' mi / '+c.mpg+' MPG)',c.fuel],['Parking & tolls',c.parking],['Food & drinks'+(c.foodIncluded?'':' (excluded)'),c.includedFood]);
       var tbody=byId('cost-rows'); tbody.replaceChildren();
       breakdown.forEach(function(item){var tr=elem('tr'),isBuffaloStay=item[0].indexOf('Buffalo ')===0;tr.append(elem('td','',item[0]),elem('td','',isBuffaloStay?exactCurrency(item[1]):currency(item[1])),elem('td','',isBuffaloStay?exactCurrency(item[1]/c.p):currency(item[1]/c.p)));tbody.append(tr);});
       byId('table-group-total').textContent=currency(c.total);
@@ -493,7 +628,7 @@ summary { cursor:pointer; font-size:13px; font-weight:800; }
     }
     function setNumber(key,id){
       byId(id).addEventListener('input',function(e){state[key]=numeric(e.target.value,0);render();});
-      byId(id).addEventListener('blur',function(e){e.target.value=String(numeric(e.target.value,0));});
+      byId(id).addEventListener('blur',function(e){state[key]=key==='mpg'?Math.max(1,numeric(e.target.value,20)):numeric(e.target.value,0);e.target.value=String(state[key]);render();});
     }
     document.querySelectorAll('input[name="scenario"]').forEach(function(input){input.addEventListener('change',function(){state.scenario=input.value;render();});});
     byId('buffalo-only').addEventListener('click',function(){state.toronto=false;render();});
@@ -504,12 +639,13 @@ summary { cursor:pointer; font-size:13px; font-weight:800; }
     byId('decrease-people').addEventListener('click',function(){state.people=Math.max(1,state.people-1);render();});
     byId('increase-people').addEventListener('click',function(){state.people=state.people+1;render();});
     setNumber('hotelRate','hotel-rate');setNumber('foodDaily','food-daily');setNumber('billsPrice','bills-price');setNumber('sabresPrice','sabres-price');setNumber('leafsPrice','leafs-price');
+    setNumber('mpg','vehicle-mpg');setNumber('gasPrice','gas-price');setNumber('milesHomeBuffalo','miles-home-buffalo');setNumber('milesBuffaloToronto','miles-buffalo-toronto');setNumber('milesTorontoHome','miles-toronto-home');setNumber('milesLocal','miles-local');
     document.querySelectorAll('[data-food]').forEach(function(button){button.addEventListener('click',function(){state.foodDaily=Number(button.dataset.food);byId('food-daily').value=String(state.foodDaily);render();});});
     var toastTimer;
     function notify(message) {var toast=byId('toast');toast.textContent=message;toast.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(function(){toast.classList.remove('show');},2400);}
     function summary() {
       var c=calc();
-      return 'WEEK 18 ROAD TRIP — JANUARY 2027\nBuffalo '+(c.buffaloStayType==='airbnb'?'Airbnb':'hotel')+': '+exactCurrency(c.bookedHotelCash)+' ('+(c.saturdayArrival?'Jan 9–11':'Jan 8–11')+')\nScenario '+state.scenario+'\nToronto Maple Leafs: '+(state.toronto?'Included':'Not included')+'\nFood & drinks in total: '+(c.foodIncluded?'Yes':'No')+'\nTravelers: '+c.p+'\nBuffalo stay units: '+c.rooms+' | Vehicles: '+c.vehicles+'\nArrival: '+(c.saturdayArrival?'Jan 9':'Jan 8')+'\nLodging nights: '+c.nights+'\nTravel home: '+(state.scenario==='2'?'Jan 13':state.toronto?'Jan 12':'Jan 11')+'\n\nEXPENSES (GROUP / PER PERSON)\n'+[[c.buffaloStayType==='airbnb'?'Buffalo Airbnb (incl. tax)':'Buffalo hotel (incl. tax)',c.bookedHotelCash],['Additional rooms/nights',c.estimatedHotelBase],['Extra hotel taxes',c.estimatedHotelTax],['Bills tickets',c.bills],['Sabres tickets',c.sabres],...(state.toronto?[['Leafs tickets',c.leafs]]:[]),['Fuel',c.fuel],['Parking & tolls',c.parking],['Food and drinks'+(c.foodIncluded?'':' (excluded)'),c.includedFood]].map(function(x){return x[0]+': '+currency(x[1])+' / '+currency(x[1]/c.p);}).join('\n')+'\n\nFOOD & DRINKS / PERSON BY DAY\n'+c.foodDays.map(function(day){return day.label+' ('+day.games+' game(s)): '+currency(day.amount);}).join('\n')+'\n\nGROUP TOTAL: '+currency(c.total)+'\nPER PERSON: '+currency(c.total/c.p)+'\n\nPlanning estimates only. NFL Week 18 kickoff is not final.';
+      return 'WEEK 18 ROAD TRIP — JANUARY 2027\nBuffalo '+(c.buffaloStayType==='airbnb'?'Airbnb':'hotel')+': '+exactCurrency(c.bookedHotelCash)+' ('+(c.saturdayArrival?'Jan 9–11':'Jan 8–11')+')\nScenario '+state.scenario+'\nToronto Maple Leafs: '+(state.toronto?'Included':'Not included')+'\nFood & drinks in total: '+(c.foodIncluded?'Yes':'No')+'\nTravelers: '+c.p+'\nBuffalo stay units: '+c.rooms+' | Vehicles: '+c.vehicles+'\nArrival: '+(c.saturdayArrival?'Jan 9':'Jan 8')+'\nLodging nights: '+c.nights+'\nMileage: '+Math.round(c.tripMiles)+' miles, '+c.mpg+' MPG, '+c.totalGallons.toFixed(1)+' total gallons, '+exactCurrency(c.gasPrice)+'/gal\nDriving route: '+c.tripRoute+'\nTravel home: '+(state.scenario==='2'?'Jan 13':state.toronto?'Jan 12':'Jan 11')+'\n\nEXPENSES (GROUP / PER PERSON)\n'+[[c.buffaloStayType==='airbnb'?'Buffalo Airbnb (incl. tax)':'Buffalo hotel (incl. tax)',c.bookedHotelCash],['Additional rooms/nights',c.estimatedHotelBase],['Extra hotel taxes',c.estimatedHotelTax],['Bills tickets',c.bills],['Sabres tickets',c.sabres],...(state.toronto?[['Leafs tickets',c.leafs]]:[]),['Fuel ('+Math.round(c.tripMiles)+' mi at '+c.mpg+' MPG, '+c.totalGallons.toFixed(1)+' gallons)',c.fuel],['Parking & tolls',c.parking],['Food and drinks'+(c.foodIncluded?'':' (excluded)'),c.includedFood]].map(function(x){return x[0]+': '+currency(x[1])+' / '+currency(x[1]/c.p);}).join('\n')+'\n\nFOOD & DRINKS / PERSON BY DAY\n'+c.foodDays.map(function(day){return day.label+' ('+day.games+' game(s)): '+currency(day.amount);}).join('\n')+'\n\nGROUP TOTAL: '+currency(c.total)+'\nPER PERSON: '+currency(c.total/c.p)+'\n\nPlanning estimates only. NFL Week 18 kickoff is not final.';
     }
     byId('copy-summary').addEventListener('click',function(){
       var text=summary();
@@ -517,16 +653,23 @@ summary { cursor:pointer; font-size:13px; font-weight:800; }
       else fallbackCopy(text);
     });
     function fallbackCopy(text) {var area=elem('textarea');area.value=text;area.style.cssText='position:fixed;top:-1000px;left:-1000px';document.body.append(area);area.select();try{document.execCommand('copy');notify('Cost estimate copied!');}catch(e){notify('Copy unavailable in this browser');}area.remove();}
-    byId('reset').addEventListener('click',function(){state=Object.assign({},DEFAULTS);['hotel-rate','food-daily','bills-price','sabres-price','leafs-price'].forEach(function(id,index){byId(id).value=[state.hotelRate,state.foodDaily,state.billsPrice,state.sabresPrice,state.leafsPrice][index];});render();notify('Calculator reset');});
+    byId('reset').addEventListener('click',function(){state=Object.assign({},DEFAULTS);['hotel-rate','food-daily','bills-price','sabres-price','leafs-price','vehicle-mpg','gas-price','miles-home-buffalo','miles-buffalo-toronto','miles-toronto-home','miles-local'].forEach(function(id,index){byId(id).value=[state.hotelRate,state.foodDaily,state.billsPrice,state.sabresPrice,state.leafsPrice,state.mpg,state.gasPrice,state.milesHomeBuffalo,state.milesBuffaloToronto,state.milesTorontoHome,state.milesLocal][index];});render();notify('Calculator reset');});
     byId('hotel-rate').value=String(numeric(state.hotelRate,270));
     byId('food-daily').value=String(numeric(state.foodDaily,100));
     byId('bills-price').value=String(numeric(state.billsPrice,225));
     byId('sabres-price').value=String(numeric(state.sabresPrice,75));
     byId('leafs-price').value=String(numeric(state.leafsPrice,145));
+    byId('vehicle-mpg').value=String(Math.max(1,numeric(state.mpg,20)));
+    byId('gas-price').value=String(numeric(state.gasPrice,3.75));
+    byId('miles-home-buffalo').value=String(numeric(state.milesHomeBuffalo,382));
+    byId('miles-buffalo-toronto').value=String(numeric(state.milesBuffaloToronto,98));
+    byId('miles-toronto-home').value=String(numeric(state.milesTorontoHome,480));
+    byId('miles-local').value=String(numeric(state.milesLocal,50));
     state.people=Math.max(1,Math.floor(numeric(state.people,4)));
     if(!['1','2','3'].includes(state.scenario))state.scenario='1';
     state.toronto=Boolean(state.toronto);
     state.includeFood=state.includeFood===true;
+    state.mpg=Math.max(1,numeric(state.mpg,20));
     if(state.buffaloStay!=='airbnb' && state.buffaloStay!=='hotel')state.buffaloStay='hotel';
     render();
   })();
