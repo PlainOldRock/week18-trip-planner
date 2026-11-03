@@ -36,6 +36,13 @@ h2 { font-size:20px; font-weight:800; letter-spacing:-.025em; line-height:1.2; m
 h3 { margin:0; }
 .helper,.route-footnote,.form-sub,.subtle-note { color:#000; font-size:12px; margin:7px 0 0; }
 .scenario-list { display:grid; gap:8px; }
+.scenario-date-options { display:grid; gap:10px; margin-top:12px; padding:14px; border:1px solid #000; }
+.scenario-date-options[hidden] { display:none; }
+.scenario-date-label { display:flex; align-items:flex-start; gap:10px; color:#000; font-size:13px; font-weight:750; cursor:pointer; }
+.scenario-date-label input { accent-color:#000; width:17px; height:17px; margin:2px 0 0; flex-shrink:0; }
+.scenario-date-label:has(input:disabled) { opacity:.6; cursor:default; }
+.scenario-date-help { display:block; font-size:11px; font-weight:450; margin-top:1px; }
+.scenario-date-note { font-size:11px; margin:12px 0 0; }
 .scenario-card { display:flex; align-items:flex-start; gap:12px; cursor:pointer; border:1px solid #000; padding:14px; border-radius:0; background:#fff; transition:none; }
 .scenario-card:hover { background:#fff; border-color:#000; }
 .scenario-card.selected,.scenario-card.selected:hover { color:#fff; background:#000; box-shadow:none; border-color:#000; }
@@ -236,6 +243,16 @@ summary { cursor:pointer; font-size:13px; font-weight:800; }
           <label class="scenario-card" data-scenario="2"><input type="radio" name="scenario" value="2"><span><span class="title">Scenario 2 <span style="color:#477478;font-weight:650">/ Saturday conflict</span></span><span class="desc">Bills Saturday · Sabres Tuesday</span><span class="date" id="scenario-two-arrival">Arrive Saturday, January 9</span></span></label>
           <label class="scenario-card" data-scenario="3"><input type="radio" name="scenario" value="3"><span><span class="title">Scenario 3 <span style="color:#477478;font-weight:650">/ Doubleheader</span></span><span class="desc">Bills Saturday 1 PM · Sabres Saturday 7 PM</span><span class="date">Arrive Friday, January 8</span></span></label>
         </div>
+        <div class="scenario-date-options" id="scenario-1-options">
+          <p class="section-id">Scenario 1 · date options</p>
+          <label class="scenario-date-label"><input type="checkbox" id="scenario1-arrive-sat"><span>Arrive Saturday · Jan 9<span class="scenario-date-help">Skip Friday and shorten the Buffalo hotel stay.</span></span></label>
+          <label class="scenario-date-label"><input type="checkbox" id="scenario1-leave-sun"><span>Leave Sunday · Jan 10<span class="scenario-date-help">Drive home after the Bills game if kickoff allows.</span></span></label>
+        </div>
+        <div class="scenario-date-options" id="scenario-3-options" hidden>
+          <p class="section-id">Scenario 3 · date option</p>
+          <label class="scenario-date-label"><input type="checkbox" id="scenario3-leave-sun"><span>Leave Sunday · Jan 10<span class="scenario-date-help">Drive home after Saturday’s doubleheader.</span></span></label>
+        </div>
+        <p class="scenario-date-note" id="scenario-date-note">Sunday departure requires Hotel + Buffalo only; Airbnb remains Friday–Monday.</p>
       </section>
       <section class="panel" aria-labelledby="route-heading">
         <div class="panel-head"><div><p class="section-id">02 / THE ROUTE</p><h2 id="route-heading">Add the Leafs game?</h2><p class="helper">Toronto adds the Monday home game and necessary hotel stay.</p></div></div>
@@ -337,7 +354,7 @@ summary { cursor:pointer; font-size:13px; font-weight:800; }
   <script>
   (function () {
     'use strict';
-    var DEFAULTS = { scenario:'1', toronto:true, buffaloStay:'hotel', includeFood:false, people:4, hotelRate:270, mpg:20, gasPrice:3.75, milesHomeBuffalo:382, milesBuffaloToronto:98, milesTorontoHome:480, milesLocal:50, foodDaily:100, billsPrice:225, sabresPrice:75, leafsPrice:145 };
+    var DEFAULTS = { scenario:'1', toronto:true, buffaloStay:'hotel', scenario1ArriveSaturday:false, scenario1LeaveSunday:false, scenario3LeaveSunday:false, includeFood:false, people:4, hotelRate:270, mpg:20, gasPrice:3.75, milesHomeBuffalo:382, milesBuffaloToronto:98, milesTorontoHome:480, milesLocal:50, foodDaily:100, billsPrice:225, sabresPrice:75, leafsPrice:145 };
     var state = Object.assign({}, DEFAULTS);
     try {
       var saved = JSON.parse(localStorage.getItem('week18-budget-v4') || 'null');
@@ -373,16 +390,25 @@ summary { cursor:pointer; font-size:13px; font-weight:800; }
         badge.classList.remove('visible'); // Fade away after two seconds.
       }, 2000);
     }
-    function foodDayPlan(sc, includeToronto) {
-      var fixedAirbnb=state.buffaloStay==='airbnb';
-      var dates=sc==='2'?[['Sat, Jan 9',1],['Sun, Jan 10',0],['Mon, Jan 11',includeToronto?1:0],['Tue, Jan 12',1],['Wed, Jan 13',0]]:
-        sc==='3'?[['Fri, Jan 8',0],['Sat, Jan 9',2],['Sun, Jan 10',0],['Mon, Jan 11',includeToronto?1:0]]:
-        includeToronto?[['Sat, Jan 9',1],['Sun, Jan 10',1],['Mon, Jan 11',1]]:
-        [['Fri, Jan 8',0],['Sat, Jan 9',1],['Sun, Jan 10',1],['Mon, Jan 11',0]];
-      if(fixedAirbnb&&(sc==='2'||(sc==='1'&&includeToronto)))dates.unshift(['Fri, Jan 8',0]);
-      if (sc!=='2' && includeToronto) dates.push(['Tue, Jan 12',0]);
-      var base=numeric(state.foodDaily,100);
-      return dates.map(function(date) {return {label:date[0],games:date[1],amount:base+50*date[1]};});
+    var TRIP_DAYS=['Fri, Jan 8','Sat, Jan 9','Sun, Jan 10','Mon, Jan 11','Tue, Jan 12','Wed, Jan 13'];
+    var TRIP_SHORT=['FRI · JAN 8','SAT · JAN 9','SUN · JAN 10','MON · JAN 11','TUE · JAN 12','WED · JAN 13'];
+    function dateWindow(sc){
+      var hotel=state.buffaloStay!=='airbnb';
+      var saturdayArrival=hotel&&(sc==='2'||(sc==='1'&&(state.toronto||state.scenario1ArriveSaturday)));
+      var sundayReturn=hotel&&!state.toronto&&((sc==='1'&&state.scenario1LeaveSunday)||(sc==='3'&&state.scenario3LeaveSunday));
+      var first=saturdayArrival?1:0,last=sc==='2'?5:sundayReturn?2:state.toronto?4:3;
+      return {first:first,last:last,saturdayArrival:saturdayArrival,sundayReturn:sundayReturn,buffaloNights:Math.min(3,last)-first,nights:last-first,days:last-first+1};
+    }
+    function gameCount(sc,withToronto,i){
+      return i===1?(sc==='3'?2:1):i===2?(sc==='1'?1:0):i===3?(withToronto?1:0):i===4?(sc==='2'?1:0):0;
+    }
+    function foodDayPlan(sc,withToronto,dates){
+      var base=numeric(state.foodDaily,100),list=[];
+      for(var i=dates.first;i<=dates.last;i++){
+        var games=gameCount(sc,withToronto,i);
+        list.push({label:TRIP_DAYS[i],games:games,amount:base+50*games});
+      }
+      return list;
     }
     function calc(scenario) {
       var sc = scenario || state.scenario;
@@ -390,12 +416,10 @@ summary { cursor:pointer; font-size:13px; font-weight:800; }
       var rooms = Math.ceil(p/4), vehicles = Math.ceil(p/5);
       var buffaloStayType=state.buffaloStay==='airbnb'?'airbnb':'hotel';
       // Airbnb dates are fixed (Fri Jan 8 to Mon Jan 11). Hotel dates can be shortened.
-      var saturdayArrival=buffaloStayType==='hotel'&&(sc==='2'||(sc==='1'&&state.toronto));
-      var buffaloNights=saturdayArrival?2:3;
-      var nights=sc==='2'?(buffaloStayType==='airbnb'?5:4):
-        sc==='1'?(state.toronto&&buffaloStayType==='airbnb'?4:3):
-        (state.toronto?4:3);
-      var days=nights+1;
+      var dates=dateWindow(sc);
+      var saturdayArrival=dates.saturdayArrival;
+      var buffaloNights=dates.buffaloNights;
+      var nights=dates.nights,days=dates.days;
       var bookedHotelCash=Math.round(BUFFALO_STAY_PRICES[buffaloStayType]*buffaloNights/3*100)/100;
       var extraRoomNights=Math.max(0,rooms-1)*buffaloNights
         +(sc==='2'?2:(state.toronto?1:0))*rooms;
@@ -422,39 +446,41 @@ summary { cursor:pointer; font-size:13px; font-weight:800; }
         ?(sc==='2'?'Arlington, VA → Buffalo → Toronto → Buffalo → Arlington, VA':'Arlington, VA → Buffalo → Toronto → Arlington, VA')
         :'Arlington, VA → Buffalo → Arlington, VA';
       var parking = (state.toronto ? (sc==='2'?220:200):150)*vehicles;
-      var foodDays = foodDayPlan(sc,state.toronto);
+      var foodDays = foodDayPlan(sc,state.toronto,dates);
       var foodPerPerson = foodDays.reduce(function(sum,day){return sum+day.amount;},0);
       var food = foodPerPerson*p;
       var foodIncluded=state.includeFood===true;
       var includedFood=foodIncluded?food:0;
-      return {p:p,rooms:rooms,vehicles:vehicles,nights:nights,days:days,hotel:hotel,tax:tax,buffaloStayType:buffaloStayType,bookedHotelCash:bookedHotelCash,buffaloNights:buffaloNights,saturdayArrival:saturdayArrival,extraRoomNights:extraRoomNights,estimatedHotelBase:estimatedHotelBase,estimatedHotelTax:estimatedHotelTax,bills:bills,sabres:sabres,leafs:leafs,fuel:fuel,tripMiles:tripMiles,tripRoute:tripRoute,mpg:mpg,gasPrice:gasPrice,gallonsPerVehicle:gallonsPerVehicle,totalGallons:totalGallons,parking:parking,food:food,includedFood:includedFood,foodIncluded:foodIncluded,foodDays:foodDays,foodPerPerson:foodPerPerson,total:hotel+tax+bills+sabres+leafs+fuel+parking+includedFood};
+      return {p:p,rooms:rooms,vehicles:vehicles,nights:nights,days:days,first:dates.first,last:dates.last,sundayReturn:dates.sundayReturn,hotel:hotel,tax:tax,buffaloStayType:buffaloStayType,bookedHotelCash:bookedHotelCash,buffaloNights:buffaloNights,saturdayArrival:saturdayArrival,extraRoomNights:extraRoomNights,estimatedHotelBase:estimatedHotelBase,estimatedHotelTax:estimatedHotelTax,bills:bills,sabres:sabres,leafs:leafs,fuel:fuel,tripMiles:tripMiles,tripRoute:tripRoute,mpg:mpg,gasPrice:gasPrice,gallonsPerVehicle:gallonsPerVehicle,totalGallons:totalGallons,parking:parking,food:food,includedFood:includedFood,foodIncluded:foodIncluded,foodDays:foodDays,foodPerPerson:foodPerPerson,total:hotel+tax+bills+sabres+leafs+fuel+parking+includedFood};
     }
-    function schedule() {
-      var sc=state.scenario, t=state.toronto;
-      var fixedAirbnb=state.buffaloStay==='airbnb';
-      var rows=[];
-      if (fixedAirbnb||sc==='3'||(sc==='1'&&!t)) rows.push({day:'FRI · JAN 8',title:'Arrive in Buffalo',note:fixedAirbnb?'Check into the Airbnb for three nights.':'Check in and settle into the city.'});
-      if (sc==='1') {
-        rows.push({day:'SAT · JAN 9',title:t&&!fixedAirbnb?'Arrive + Sabres vs. Hurricanes':'Sabres vs. Hurricanes',note:'7:00 PM · KeyBank Center, Buffalo'});
-        rows.push({day:'SUN · JAN 10',title:'Bills vs. Jets',note:'Kickoff TBD · Highmark Stadium, Orchard Park'});
-      } else if(sc==='2') {
-        rows.push({day:'SAT · JAN 9',title:fixedAirbnb?'Bills vs. Jets':'Arrive + Bills vs. Jets',note:'Buffalo home game · kickoff TBD'});
-        rows.push({day:'SUN · JAN 10',title:'Free day in Buffalo',note:'Explore the city or relax.'});
-      } else {
-        rows.push({day:'SAT · JAN 9',title:'Bills + Sabres doubleheader',note:'Bills 1:00 PM · Sabres 7:00 PM'});
-        rows.push({day:'SUN · JAN 10',title:'Free day in Buffalo',note:'Explore the city or relax.'});
+    function schedule(){
+      var sc=state.scenario,t=state.toronto,airbnb=state.buffaloStay==='airbnb';
+      var dates=dateWindow(sc),rows=[];
+      for(var i=dates.first;i<=dates.last;i++){
+        var title='',note='';
+        if(i===0){
+          title='Arrive in Buffalo';note=airbnb?'Check into the Airbnb for three nights.':'Check into the Buffalo hotel.';
+        } else if(i===1){
+          if(sc==='1'){title='Sabres vs. Hurricanes';note='7:00 PM · KeyBank Center';}
+          else if(sc==='2'){title='Bills vs. Jets';note='Kickoff TBD · Orchard Park';}
+          else{title='Bills + Sabres doubleheader';note='Bills 1:00 PM (conditional) · Sabres 7:00 PM';}
+          if(dates.first===1)title='Arrive + '+title;
+        } else if(i===2){
+          if(sc==='1'){
+            title=dates.sundayReturn?'Bills vs. Jets + travel home':'Bills vs. Jets';
+            note=dates.sundayReturn?'Kickoff TBD · Drive home only if time permits.':'Kickoff TBD · Orchard Park';
+          }else if(dates.sundayReturn){title='Travel home';note='Drive home after Saturday’s doubleheader.';}
+          else{title='Free day in Buffalo';note='Explore the city or relax.';}
+        } else if(i===3){
+          if(t){title=airbnb?'Airbnb checkout + Maple Leafs vs. Jets':'Maple Leafs vs. Jets';note='Drive to Toronto · 7:30 PM · Scotiabank Arena';}
+          else if(sc==='2'){title=airbnb?'Airbnb checkout + hotel check-in':'Free day in Buffalo';note='Additional lodging Monday and Tuesday before the Sabres game.';}
+          else{title=airbnb?'Airbnb checkout + travel home':'Travel home';note='Drive home from Buffalo.';}
+        } else if(i===4){
+          if(sc==='2'){title='Sabres vs. Devils';note=t?'Return from Toronto · 7:00 PM · KeyBank Center':'7:00 PM · KeyBank Center';}
+          else{title='Travel home';note='Drive home from Toronto.';}
+        } else if(i===5){title='Travel home';note='Drive home from Buffalo.';}
+        rows.push({day:TRIP_SHORT[i],title:title,note:note});
       }
-      rows.push({day:'MON · JAN 11',
-        title:t?(fixedAirbnb?'Airbnb checkout + Maple Leafs vs. Jets':'Maple Leafs vs. Jets'):
-          sc==='2'?(fixedAirbnb?'Airbnb checkout + hotel check-in':'Free day in Buffalo'):
-          fixedAirbnb?'Airbnb checkout + travel home':'Travel home',
-        note:t?'Leave Buffalo; Leafs 7:30 PM · Scotiabank Arena, Toronto':
-          sc==='2'?'Stay in another hotel for the Tuesday Sabres game.':
-          'Drive home from Buffalo.'});
-      if (sc==='2') {
-        rows.push({day:'TUE · JAN 12',title:'Sabres vs. Devils',note:'7:00 PM · KeyBank Center, Buffalo'});
-        rows.push({day:'WED · JAN 13',title:'Travel home',note:'Drive home from Buffalo.'});
-      } else if (t) rows.push({day:'TUE · JAN 12',title:'Travel home',note:'Drive home from Toronto.'});
       return rows;
     }
     function elem(tag, className, value) { var el=document.createElement(tag); if(className) el.className=className; if (value!==undefined) el.textContent=value; return el; }
@@ -485,33 +511,28 @@ summary { cursor:pointer; font-size:13px; font-weight:800; }
       wrap.append(img,fallback);
       return wrap;
     }
-    function weekEvents(sc,withToronto,saturdayArrival,airbnb){
-      // Each array is a day from Fri Jan 8 to Thu Jan 14 (2027).
+    function weekEvents(sc,withToronto,dates,airbnb){
       var days=[[],[],[],[],[],[],[]];
-      var last=sc==='2'?5:withToronto?4:3;
-      var first=saturdayArrival?1:0;
-      days[first].push('car'); // Drive to Buffalo.
+      days[dates.first].push('car');
       if(sc==='1'){days[1].push('sabres');days[2].push('bills');}
       else if(sc==='2'){days[1].push('bills');days[4].push('sabres');}
       else{days[1].push('bills','sabres');}
       if(withToronto){
-        days[3].push('car','leafs'); // Buffalo → Toronto on Monday.
-        if(sc==='2')days[4].unshift('car'); // Toronto → Buffalo on Tuesday.
-      } else if(sc==='2'&&airbnb){
-        days[3].push('car'); // Move out of the fixed Airbnb Monday.
-      }
-      days[last].push('car'); // Drive home.
-      return {days:days,first:first,last:last};
+        days[3].push('car','leafs');
+        if(sc==='2')days[4].unshift('car');
+      }else if(sc==='2'&&airbnb){days[3].push('car');}
+      days[dates.last].push('car');
+      return {days:days,first:dates.first,last:dates.last};
     }
     var lastRenderedWeekKey=null;
     function renderTripWeek(c){
       // Keep logos mounted while price/MPG inputs change, avoiding image flicker.
-      var key=[state.scenario,state.toronto,c.saturdayArrival,c.buffaloStayType].join('|');
+      var key=[state.scenario,state.toronto,c.first,c.last,c.buffaloStayType].join('|');
       if(lastRenderedWeekKey!==key){
         lastRenderedWeekKey=key;
         var days=['FRI 8','SAT 9','SUN 10','MON 11','TUE 12','WED 13','THU 14'];
         var eventNames={car:'Driving',bills:'Buffalo Bills game',sabres:'Buffalo Sabres game',leafs:'Toronto Maple Leafs game'};
-        var plan=weekEvents(state.scenario,state.toronto,c.saturdayArrival,c.buffaloStayType==='airbnb');
+        var plan=weekEvents(state.scenario,state.toronto,c,c.buffaloStayType==='airbnb');
         var calendar=byId('trip-week-calendar'); calendar.replaceChildren();
         days.forEach(function(day,index){
           var active=index>=plan.first&&index<=plan.last;
